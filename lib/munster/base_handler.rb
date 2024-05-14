@@ -14,8 +14,7 @@ class Munster::BaseHandler
       }
       webhook = Munster::ReceivedWebhook.create!(**attrs)
 
-      ## TODO: It should be possible to redefine this job throuhg configuration.
-      Munster::ProcessingJob.perform_later(webhook)
+      processing_job_class.perform_later(webhook)
     rescue ActiveRecord::RecordNotUnique # Deduplicated
       nil
     end

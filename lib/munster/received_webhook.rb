@@ -3,8 +3,7 @@
 module Munster
   class ReceivedWebhook < ApplicationRecord
     self.implicit_order_column = "created_at"
-    # TODO: this should take a configured table name, e.g. it should be possible to use 'received_webhooks' table.
-    # self.table_name = "munster_received_webhooks"
+    self.table_name = Munster.receive_webhooks_table_name
 
     include Munster::StateMachineEnum
 
