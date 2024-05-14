@@ -3,7 +3,7 @@
 require "rails/generators"
 require "rails/generators/active_record"
 
-module Pecorino
+module Munster
   #
   # Rails generator used for setting up Munster in a Rails application.
   # Run it with +bin/rails g munster:install+ in your console.

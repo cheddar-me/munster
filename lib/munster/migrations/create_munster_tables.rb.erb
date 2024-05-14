@@ -1,6 +1,7 @@
 class CreateMunsterTables < ActiveRecord::Migration<%= migration_version %>
+<% id_type = Rails.application.config.generators.options[:active_record][:primary_key_type] rescue nil %>
   def change
-    create_table :munster_received_webhooks, id: :uuid do |t|
+    create_table :munster_received_webhooks<%= ", id: #{id_type}" if id_type %> do |t|
       t.string :handler_event_id, null: false
       t.string :handler_module_name, null: false
       t.string :status, default: "received", null: false

@@ -10,8 +10,5 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_14_125649) do
-# Could not dump table "munster_received_webhooks" because of following StandardError
-#   Unknown type 'uuid' for column 'id'
-
+ActiveRecord::Schema[7.0].define(version: 0) do
 end
