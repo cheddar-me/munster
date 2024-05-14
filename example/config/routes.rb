@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # It's possible to constrain to certain domains, like the following:
+  # mount Munster::Engine => "/", constraints: Rails.configuration.domains.webhooks
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  # But this is a simple example, we'll just mount it to the root path.
+  mount Munster::Engine => "/"
 end

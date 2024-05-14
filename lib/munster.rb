@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 require_relative "munster/version"
-require_relative "munster/railtie" if defined?(Rails::Railtie)
+require_relative "munster/engine" if defined?(Rails::Railtie)
 
 module Munster
-  class Error < StandardError; end
-  # Your code goes here...
-
   def self.processing_job_class=(job_class)
     @processing_job_class = job_class
   end
@@ -21,5 +18,13 @@ module Munster
 
   def self.receive_webhooks_table_name
     @receive_webhooks_table_name || "munster_received_webhooks"
+  end
+
+  def self.active_handlers=(active_handlers)
+    @active_handlers = active_handlers
+  end
+
+  def self.active_handlers
+    @active_handlers || []
   end
 end
