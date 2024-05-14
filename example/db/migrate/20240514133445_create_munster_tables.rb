@@ -1,6 +1,7 @@
 class CreateMunsterTables < ActiveRecord::Migration[7.0]
+
   def change
-    create_table :munster_received_webhooks, id: :uuid do |t|
+    create_table :munster_received_webhooks, id: uuid do |t|
       t.string :handler_event_id, null: false
       t.string :handler_module_name, null: false
       t.string :status, default: "received", null: false
