@@ -27,7 +27,7 @@ class ReceiveWebhooksController < ActionController::API
     case e
     when HandlerRefused
       render_error("Webhook handler did not validate the request (signature or authentication may be invalid)", :forbidden)
-    when JSON::ParseError, KeyError
+    when JSON::ParserError, KeyError
       render_error("Required parameters were not present in the request or the request body was not valid JSON", :bad_request)
     else
       render_error("Internal error", :internal_server_error)

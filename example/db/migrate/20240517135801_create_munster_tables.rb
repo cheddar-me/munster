@@ -1,7 +1,7 @@
-class CreateMunsterTables < ActiveRecord::Migration<%= migration_version %>
-<% id_type = Rails.application.config.generators.options[:active_record][:primary_key_type] rescue nil %>
+class CreateMunsterTables < ActiveRecord::Migration[7.0]
+
   def change
-    create_table :<%= Munster.receive_webhooks_table_name %><%= ", id: :#{id_type}" if id_type %> do |t|
+    create_table :munster_received_webhooks do |t|
       t.string :handler_event_id, null: false
       t.string :handler_module_name, null: false
       t.string :status, default: "received", null: false
@@ -16,8 +16,8 @@ class CreateMunsterTables < ActiveRecord::Migration<%= migration_version %>
 
     # For deduplication at ingress. UNIQUE indices in Postgres are case-sensitive
     # which is what we want, as these are externally-generated IDs
-    add_index :<%= Munster.receive_webhooks_table_name %>, [:handler_module_name, :handler_event_id], unique: true, name: "webhook_dedup_idx"
+    add_index :munster_received_webhooks, [:handler_module_name, :handler_event_id], unique: true, name: "webhook_dedup_idx"
     # For backfill processing (to know how many skipped etc. payloads we have)
-    add_index :<%= Munster.receive_webhooks_table_name %>, [:status]
+    add_index :munster_received_webhooks, [:status]
   end
 end

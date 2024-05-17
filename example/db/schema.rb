@@ -10,5 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 0) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_17_135801) do
+  create_table "munster_received_webhooks", force: :cascade do |t|
+    t.string "handler_event_id", null: false
+    t.string "handler_module_name", null: false
+    t.string "status", default: "received", null: false
+    t.binary "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["handler_module_name", "handler_event_id"], name: "webhook_dedup_idx", unique: true
+    t.index ["status"], name: "index_munster_received_webhooks_on_status"
+  end
 end
