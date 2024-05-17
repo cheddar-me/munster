@@ -1,4 +1,6 @@
-require 'active_job' if defined?(Rails)
+# frozen_string_literal: true
+
+require "active_job" if defined?(Rails)
 
 unless defined?(ApplicationJob)
   class ApplicationJob < ActiveJob::Base

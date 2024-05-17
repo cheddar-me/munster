@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   # It's possible to constrain to certain domains, like the following:
   # mount Munster::Engine => "/", constraints: Rails.configuration.domains.webhooks

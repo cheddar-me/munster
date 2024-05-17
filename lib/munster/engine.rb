@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "controllers/receive_webhooks_controller"
 require_relative "jobs/processing_job"
 require_relative "models/received_webhook"

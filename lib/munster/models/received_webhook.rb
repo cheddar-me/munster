@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'active_record' if defined?(Rails)
-require_relative '../state_machine_enum'
+require "active_record" if defined?(Rails)
+require_relative "../state_machine_enum"
 
 unless defined?(ApplicationRecord)
   class ApplicationRecord < ActiveRecord::Base

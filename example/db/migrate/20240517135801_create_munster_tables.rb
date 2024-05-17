@@ -1,5 +1,6 @@
-class CreateMunsterTables < ActiveRecord::Migration[7.0]
+# frozen_string_literal: true
 
+class CreateMunsterTables < ActiveRecord::Migration[7.0]
   def change
     create_table :munster_received_webhooks do |t|
       t.string :handler_event_id, null: false

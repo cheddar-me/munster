@@ -102,18 +102,18 @@ module Munster
           end
 
           # Define the check methods
-          define_method("ensure_#{attribute_name}_one_of!") do |*allowed_states|
+          define_method(:"ensure_#{attribute_name}_one_of!") do |*allowed_states|
             val = self[attribute_name]
             return if Set.new(allowed_states.map(&:to_s)).include?(val)
             raise InvalidState, "#{attribute_name} must be one of #{allowed_states.inspect} but was #{val.inspect}"
           end
 
-          define_method("ensure_#{attribute_name}_may_transition_to!") do |next_state|
+          define_method(:"ensure_#{attribute_name}_may_transition_to!") do |next_state|
             val = self[attribute_name]
             raise InvalidState, "#{attribute_name} already is #{val.inspect}" if next_state.to_s == val
           end
 
-          define_method("#{attribute_name}_may_transition_to?") do |next_state|
+          define_method(:"#{attribute_name}_may_transition_to?") do |next_state|
             val = self[attribute_name]
             return false if val == next_state.to_s
             collector.may_transition?(val, next_state)
