@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "munster/version"
-require_relative "munster/engine" if defined?(Rails::Railtie)
+require_relative "munster/engine" if defined?(Rails)
 
 module Munster
   def self.processing_job_class=(job_class)

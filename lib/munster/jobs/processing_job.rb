@@ -1,3 +1,10 @@
+require 'active_job' if defined?(Rails)
+
+unless defined?(ApplicationJob)
+  class ApplicationJob < ActiveJob::Base
+  end
+end
+
 module Munster
   class ProcessingJob < ApplicationJob
     def perform(webhook)

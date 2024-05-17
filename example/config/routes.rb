@@ -3,5 +3,5 @@ Rails.application.routes.draw do
   # mount Munster::Engine => "/", constraints: Rails.configuration.domains.webhooks
 
   # But this is a simple example, we'll just mount it to the root path.
-  mount Munster::Engine => "/"
+  post "/webhooks/:service_id", to: "receive_webhooks#create", namespace: "munster"
 end
