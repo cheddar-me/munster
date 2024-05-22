@@ -17,7 +17,7 @@ module Munster
         }
         webhook = Munster::ReceivedWebhook.create!(**attrs)
 
-        Munster::ProcessingJob.perform_later(webhook)
+        Munster.configuration.processing_job_class.perform_later(webhook)
       rescue ActiveRecord::RecordNotUnique # Deduplicated
         nil
       end

@@ -4,27 +4,22 @@ require_relative "munster/version"
 require_relative "munster/engine" if defined?(Rails)
 
 module Munster
-  def self.processing_job_class=(job_class)
-    @processing_job_class = job_class
+  class << self
+    attr_accessor :configuration
   end
 
-  def self.processing_job_class
-    @processing_job_class || Munster::ProcessingJob
+  def self.configure
+    self.configuration ||= Configuration.new
+    yield(configuration) if block_given?
   end
 
-  def self.receive_webhooks_table_name=(table_name)
-    @receive_webhooks_table_name = table_name
-  end
+  class Configuration
+    attr_accessor :receive_webhooks_table_name, :processing_job_class, :active_handlers
 
-  def self.receive_webhooks_table_name
-    @receive_webhooks_table_name || "munster_received_webhooks"
-  end
-
-  def self.active_handlers=(active_handlers)
-    @active_handlers = active_handlers
-  end
-
-  def self.active_handlers
-    @active_handlers || []
+    def initialize
+      @receive_webhooks_table_name = :munster_received_webhooks
+      @processing_job_class = Munster::ProcessingJob
+      @active_handlers = []
+    end
   end
 end

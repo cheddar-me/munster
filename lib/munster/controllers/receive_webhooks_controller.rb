@@ -40,6 +40,6 @@ class ReceiveWebhooksController < ActionController::API
   end
 
   def lookup_handler(service_id_str)
-    Munster.active_handlers.index_by(&:service_id).fetch(service_id_str.to_sym)
+    Munster.configuration.active_handlers.index_by(&:service_id).fetch(service_id_str.to_sym)
   end
 end
