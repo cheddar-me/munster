@@ -10,6 +10,11 @@ class ReceiveWebhooksController < ActionController::API
 
     raise HandlerRefused unless handler.valid?(request)
 
+    # FIXME: Duplicated webhook will be overwritten here and processing job will be quite for second time.
+    # This will generate a following error in this case:
+    #    Error performing Munster::ProcessingJob (Job ID: b40f3f28-81be-4c99-bce8-9ad879ec9754) from Async(default) in 9.95ms: ActiveRecord::RecordInvalid (Validation failed: Status Invalid transition from processing to received):
+    #
+    # This should be handled properly.
     handler.handle(request)
     head :ok
   rescue => e
