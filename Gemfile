@@ -4,3 +4,7 @@ source "https://rubygems.org"
 
 # Specify your gem's dependencies in munster.gemspec
 gemspec
+
+group :development do
+  gem 'webrick'
+end

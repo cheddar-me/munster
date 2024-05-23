@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     munster (0.1.0)
+      rack
       rails (~> 7.0)
 
 GEM
@@ -184,6 +185,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    webrick (1.8.1)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -198,6 +200,7 @@ DEPENDENCIES
   munster!
   rake (~> 13.0)
   standard
+  webrick
 
 BUNDLED WITH
    2.5.6

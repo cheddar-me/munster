@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rails", "~> 7.0"
+  spec.add_dependency "rack"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "standard"
   spec.add_development_dependency "magic_frozen_string_literal"
