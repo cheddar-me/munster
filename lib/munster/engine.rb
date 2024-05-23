@@ -8,11 +8,10 @@ require_relative "web"
 
 module Munster
   class Engine < ::Rails::Engine
-    isolate_namespace Munster
-
-    autoload :Munster, "munster"
-    autoload :ProcessingJob, "munster/jobs/processing_job"
-    autoload :BaseHandler, "munster/base_handler"
+    initializer "Munster.load_dependencies" do |app|
+      require_relative 'web'
+      require_relative 'routes'
+    end
 
     config.after_initialize do
       Munster.configure
@@ -22,14 +21,25 @@ module Munster
       require_relative "install_generator"
     end
 
-    initializer "Munster.add_middleware" do |app|
-      require_relative 'web'
+    initializer "munster.add_reloader" do |app|
+      app.middleware.use Munster::Reloader
     end
   end
-end
 
-Munster::Engine.routes.draw do
-  webhook_controller = Munster::Web.new
+  class Reloader
+    def initialize(app)
+      @app = app
+      setup_reloader
+    end
 
-  mount webhook_controller => "/:service_id"
+    def setup_reloader
+      ActiveSupport::Reloader.to_prepare do
+        Rails.application.reload_routes!
+      end
+    end
+
+    def call(env)
+      @app.call(env)
+    end
+  end
 end
