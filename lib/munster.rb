@@ -2,24 +2,21 @@
 
 require_relative "munster/version"
 require_relative "munster/engine" if defined?(Rails)
+require "active_support/configurable"
 
 module Munster
-  class << self
-    attr_accessor :configuration
+  def self.configuration
+    @configuration ||= Configuration.new
   end
 
   def self.configure
-    self.configuration ||= Configuration.new
-    yield(configuration) if block_given?
+    yield configuration
   end
+end
 
-  class Configuration
-    attr_accessor :processing_job_class, :active_handlers
+class Munster::Configuration
+  include ActiveSupport::Configurable
 
-    def initialize
-      # Remove this configuration option
-      @processing_job_class = Munster::ProcessingJob
-      @active_handlers = []
-    end
-  end
+  config_accessor(:processing_job_class) {Munster::ProcessingJob}
+  config_accessor(:active_handlers) {[]}
 end

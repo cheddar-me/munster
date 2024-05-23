@@ -15,10 +15,6 @@ module Munster
     autoload :ProcessingJob, "munster/jobs/processing_job"
     autoload :BaseHandler, "munster/base_handler"
 
-    config.after_initialize do
-      Munster.configure
-    end
-
     generators do
       require_relative "install_generator"
     end
