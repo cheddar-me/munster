@@ -6,7 +6,6 @@ require_relative "jobs/processing_job"
 require_relative "models/received_webhook"
 require_relative "base_handler"
 
-
 module Munster
   class Engine < ::Rails::Engine
     isolate_namespace Munster

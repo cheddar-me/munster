@@ -11,13 +11,14 @@ module Munster
   class InstallGenerator < Rails::Generators::Base
     include ActiveRecord::Generators::Migration
 
-    TEMPLATES = File.join(File.dirname(__FILE__))
-    source_paths << TEMPLATES
-
-    class_option :database, type: :string, aliases: %i[--db], desc: "The database for your migration. By default, the current environment's primary database is used."
+    source_root File.expand_path('../templates', __FILE__)
 
     def create_migration_file
-      migration_template "migrations/create_munster_tables.rb.erb", File.join(db_migrate_path, "create_munster_tables.rb")
+      migration_template "create_munster_tables.rb.erb", File.join(db_migrate_path, "create_munster_tables.rb")
+    end
+
+    def copy_files
+      template "munster.rb", File.join("config", "initializers", "munster.rb")
     end
 
     private

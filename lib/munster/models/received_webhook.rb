@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../../munster"
 require_relative "../state_machine_enum"
-
-autoload :Munster, "munster"
 
 module Munster
   class ReceivedWebhook < ActiveRecord::Base
     self.implicit_order_column = "created_at"
-    #self.table_name = Munster.configuration.receive_webhooks_table_name
 
     include Munster::StateMachineEnum
 

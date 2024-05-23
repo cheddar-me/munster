@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -12,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_17_135801) do
-  create_table "munster_received_webhooks", force: :cascade do |t|
+ActiveRecord::Schema[7.0].define(version: 2024_05_23_123436) do
+  create_table "receive_webhooks", force: :cascade do |t|
     t.string "handler_event_id", null: false
     t.string "handler_module_name", null: false
     t.string "status", default: "received", null: false
@@ -21,6 +19,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_17_135801) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["handler_module_name", "handler_event_id"], name: "webhook_dedup_idx", unique: true
-    t.index ["status"], name: "index_munster_received_webhooks_on_status"
+    t.index ["status"], name: "index_receive_webhooks_on_status"
   end
+
 end
