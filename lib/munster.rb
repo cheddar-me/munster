@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "munster/version"
-require_relative "munster/engine" if defined?(Rails)
+require_relative "munster/engine"
 require "active_support/configurable"
 
 module Munster
