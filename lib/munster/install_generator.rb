@@ -11,7 +11,7 @@ module Munster
   class InstallGenerator < Rails::Generators::Base
     include ActiveRecord::Generators::Migration
 
-    source_root File.expand_path('../templates', __FILE__)
+    source_root File.expand_path("../templates", __FILE__)
 
     def create_migration_file
       migration_template "create_munster_tables.rb.erb", File.join(db_migrate_path, "create_munster_tables.rb")

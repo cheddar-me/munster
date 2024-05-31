@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  mount MunsterEngine::Engine => "/munster_engine"
+  mount Munster::Engine => "/munster"
 end

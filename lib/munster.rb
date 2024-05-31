@@ -17,6 +17,6 @@ end
 class Munster::Configuration
   include ActiveSupport::Configurable
 
-  config_accessor(:processing_job_class) {Munster::ProcessingJob}
-  config_accessor(:active_handlers) {[]}
+  config_accessor(:processing_job_class) { Munster::ProcessingJob }
+  config_accessor(:active_handlers) { [] }
 end
