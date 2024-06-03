@@ -3,6 +3,7 @@
 require_relative "munster/version"
 require_relative "munster/engine"
 require "active_support/configurable"
+require_relative "munster/jobs/processing_job"
 
 module Munster
   def self.configuration

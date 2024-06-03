@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Stanislav Katkov"]
   spec.email = ["skatkov@cheddar.me"]
 
-  spec.summary = "Webhooks framework for rails applications "
+  spec.summary = "Webhooks framework for Rails applications"
   spec.description = spec.summary
   spec.homepage = "https://www.cheddar.me/"
   spec.license = "MIT"
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "rails", "~> 7.1"
+  spec.add_dependency "rails", ">= 7.0"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "standard"
   spec.add_development_dependency "magic_frozen_string_literal"
