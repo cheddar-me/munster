@@ -1,0 +1,33 @@
+_fixture:
+  model_class: Munster::ReceivedWebhook
+
+received_provider_disruption:
+  handler_event_id: <%= ActiveRecord::FixtureSet.identify("provider_disruption_events/ongoing_1") %>
+  status: received
+  handler_module_name: "TestHandler"
+  body: '{"provider_id":"musterbank-flyio","starts_at":"<%= Time.now.utc %>","external_source":"The Forge Of Downtime","external_ticket_title":"DOWN-123","internal_description_markdown":"A test has failed"}'
+  created_at: <%= Time.now.utc %>
+  updated_at: <%= Time.now.utc %>
+
+customer_io_subscribed:
+  handler_event_id: "01E4C4CT6YDC7Y5M7FE1GWWPQJ"
+  handler_module_name: "CustomerIoHandler"
+  status: received
+  created_at: <%= Time.now.utc %>
+  updated_at: <%= Time.now.utc %>
+  body: >
+    {
+      "metric": "subscribed",
+      "event_id": "01E4C4CT6YDC7Y5M7FE1GWWPQJ",
+      "object_type": "customer",
+      "timestamp": 1613063089,
+      "data": {
+        "customer_id": "42",
+        "email_address": "test@example.com",
+        "identifiers": {
+          "id": "42",
+          "email": "test@example.com",
+          "cio_id": "d9c106000001"
+        }
+      }
+    }

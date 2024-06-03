@@ -6,6 +6,8 @@ module Munster
     end
 
     def create
+      binding.irb
+
       handler = lookup_handler(params[:service_id])
       return render_error("Webhook handler is inactive", :service_unavailable) unless handler.active?
 

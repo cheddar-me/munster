@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  mount Munster::Engine, at: "/webhooks"
+  mount Munster::Engine, at: "/webhooks", as: "webhooks"
 end
