@@ -20,4 +20,5 @@ class Munster::Configuration
 
   config_accessor(:processing_job_class) { Munster::ProcessingJob }
   config_accessor(:active_handlers) { [] }
+  config_accessor(:error_context) { {} }
 end
