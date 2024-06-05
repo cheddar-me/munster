@@ -11,10 +11,9 @@ class WebhookTestHandler < Munster::BaseHandler
   def self.process(webhook)
     return unless webhook.received?
     webhook.update!(status: "processing")
-    wait(5)
     webhook.update!(status: "processed")
   rescue
-    webhook.update!(status: "received")
+    webhook.update!(status: "error")
     raise
   end
 
