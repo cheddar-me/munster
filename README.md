@@ -24,6 +24,12 @@ Mount munster engine in your routes.
 
 `mount Munster::Engine, at: "/webhooks"`
 
+## Requirements
+This project depends on two dependencies:
+
+- Ruby >= 3.0
+- Rails >= 7.0
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
