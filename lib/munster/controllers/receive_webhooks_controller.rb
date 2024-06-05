@@ -13,14 +13,9 @@ module Munster
       raise HandlerInactive unless handler.active?
       raise HandlerRefused unless handler.valid?(request)
 
-      # FIXME: Duplicated webhook will be overwritten here and processing job will be quite for second time.
-      # This will generate a following error in this case:
-      #    Error performing Munster::ProcessingJob (Job ID: b40f3f28-81be-4c99-bce8-9ad879ec9754) from Async(default) in 9.95ms: ActiveRecord::RecordInvalid (Validation failed: Status Invalid transition from processing to received):
-      #
-      # This should be handled properly.
       handler.handle(request)
       head :ok
-    rescue KeyError
+    rescue KeyError # handler was not found, so we return generic 404 error.
       render_error("Required parameters were not present in the request", :not_found)
     rescue => e
       # TODO: add exception handler here

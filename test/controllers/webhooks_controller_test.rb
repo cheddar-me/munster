@@ -2,6 +2,7 @@ require "test_helper"
 
 class WebhooksControllerTest < ActionDispatch::IntegrationTest
   setup { @body_str = received_webhooks(:received_provider_disruption).body}
+
   test "accepts a customer.io webhook with changed notification preferences" do
     post "/munster/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 200
@@ -30,5 +31,23 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     assert_response 403
     assert_equal "Webhook handler did not validate the request (signature or authentication may be invalid)", response.parsed_body["error"]
+  end
+
+  test "will not expose errors, if handler doesn't do that" do
+    post "/munster/private", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+
+    assert_response 200
+    assert_nil response.parsed_body["error"]
+  end
+
+  test "saves only one webhook" do
+    body = { event_id: SecureRandom.uuid, body: 'test'}.to_json
+
+    assert_changes_by -> { Munster::ReceivedWebhook.count }, exactly: 1 do
+      3.times do
+        post "/munster/extract_id", params: body, headers: {"CONTENT_TYPE" => "application/json"}
+        assert_response 200
+      end
+    end
   end
 end
