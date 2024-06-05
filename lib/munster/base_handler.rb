@@ -26,14 +26,6 @@ module Munster
       def process(received_webhook)
       end
 
-      # This should be defined for each webhook handler and should be unique.
-      # Otherwise controller will never pick up, that this handler exists.
-      #
-      # Please consider that this will be used in url, so don't use underscores or any other symbols that are not used in URL.
-      def service_id
-        :base
-      end
-
       # This method verifies that request actually comes from provider:
       # signature validation, HTTP authentication, IP whitelisting and the like
       def valid?(action_dispatch_request)

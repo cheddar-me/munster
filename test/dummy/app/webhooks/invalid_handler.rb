@@ -2,6 +2,4 @@
 
 class InvalidHandler < WebhookTestHandler
   def self.valid?(request) = false
-
-  def self.service_id = :invalid
 end
