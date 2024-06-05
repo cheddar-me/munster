@@ -4,11 +4,13 @@ module Munster
   class ReceiveWebhooksController < ActionController::API
     class HandlerRefused < StandardError
     end
+    class HandlerInactive <StandardError
+    end
 
     def create
       handler = lookup_handler(params[:service_id])
-      return render_error("Webhook handler is inactive", :service_unavailable) unless handler.active?
 
+      raise HandlerInactive unless handler.active?
       raise HandlerRefused unless handler.valid?(request)
 
       # FIXME: Duplicated webhook will be overwritten here and processing job will be quite for second time.
@@ -18,6 +20,8 @@ module Munster
       # This should be handled properly.
       handler.handle(request)
       head :ok
+    rescue KeyError
+      render_error("Required parameters were not present in the request", :not_found)
     rescue => e
       # TODO: add exception handler here
       # Appsignal.add_exception(e)
@@ -33,8 +37,10 @@ module Munster
       case e
       when HandlerRefused
         render_error("Webhook handler did not validate the request (signature or authentication may be invalid)", :forbidden)
-      when JSON::ParserError, KeyError
-        render_error("Required parameters were not present in the request or the request body was not valid JSON", :bad_request)
+      when HandlerInactive
+        render_error("Webhook handler is inactive", :service_unavailable)
+      when JSON::ParserError
+        render_error("Request body is not a valid JSON", :bad_request)
       else
         render_error("Internal error", :internal_server_error)
       end
