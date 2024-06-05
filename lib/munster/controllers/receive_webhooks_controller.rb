@@ -19,7 +19,7 @@ module Munster
     rescue KeyError # handler was not found, so we return generic 404 error.
       render_error("Required parameters were not present in the request", :not_found)
     rescue => e
-      Rails.error.set_context(Munster.configuration.error_context)
+      Rails.error.set_context(**Munster.configuration.error_context)
       Rails.error.report(e)
 
       if handler&.expose_errors_to_sender?
