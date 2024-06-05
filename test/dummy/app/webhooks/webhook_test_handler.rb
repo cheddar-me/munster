@@ -16,10 +16,6 @@ class WebhookTestHandler < Munster::BaseHandler
     webhook.update!(status: "error")
   end
 
-  def self.service_id
-    :test
-  end
-
   def self.expose_errors_to_sender?
     true
   end

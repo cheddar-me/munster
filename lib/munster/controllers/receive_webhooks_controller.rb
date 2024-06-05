@@ -47,7 +47,7 @@ module Munster
     end
 
     def lookup_handler(service_id_str)
-      Munster.configuration.active_handlers.index_by(&:service_id).fetch(service_id_str.to_sym)
+      Munster.configuration.active_handlers.with_indifferent_access.fetch(service_id_str)
     end
   end
 end
