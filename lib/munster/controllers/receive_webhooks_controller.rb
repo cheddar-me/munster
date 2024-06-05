@@ -44,7 +44,7 @@ module Munster
 
     def render_error(message_str, status_sym)
       json = {error: message_str}.to_json
-      render(json:, status: status_sym)
+      render(json: json, status: status_sym)
     end
 
     def lookup_handler(service_id_str)
