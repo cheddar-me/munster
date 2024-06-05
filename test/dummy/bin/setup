@@ -4,8 +4,8 @@ require "fileutils"
 # path to your application root.
 APP_ROOT = File.expand_path("..", __dir__)
 
-def system!(*)
-  system(*, exception: true)
+def system!(*args)
+  system(*args) || abort("\n== Command #{args} failed ==")
 end
 
 FileUtils.chdir APP_ROOT do

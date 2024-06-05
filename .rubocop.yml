@@ -1,0 +1,9 @@
+require: standard
+
+AllCops:
+  TargetRubyVersion: 3.1
+
+inherit_gem:
+  standard: config/base.yml
+# Don't define any actual rubocop config here - this file is only used for
+# proper editor support, and not used on CI, formatters, nor anywhere else.

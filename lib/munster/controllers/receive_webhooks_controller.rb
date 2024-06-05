@@ -4,7 +4,8 @@ module Munster
   class ReceiveWebhooksController < ActionController::API
     class HandlerRefused < StandardError
     end
-    class HandlerInactive <StandardError
+
+    class HandlerInactive < StandardError
     end
 
     def create

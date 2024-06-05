@@ -1,7 +1,7 @@
 require "test_helper"
 
 class WebhooksControllerTest < ActionDispatch::IntegrationTest
-  setup { @body_str = received_webhooks(:received_provider_disruption).body}
+  setup { @body_str = received_webhooks(:received_provider_disruption).body }
 
   test "accepts a customer.io webhook with changed notification preferences" do
     post "/munster/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
@@ -41,7 +41,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "saves only one webhook" do
-    body = { event_id: SecureRandom.uuid, body: 'test'}.to_json
+    body = {event_id: SecureRandom.uuid, body: "test"}.to_json
 
     assert_changes_by -> { Munster::ReceivedWebhook.count }, exactly: 1 do
       3.times do

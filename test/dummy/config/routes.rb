@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  mount Munster::Engine => "/munster", as: "webhooks"
+  mount Munster::Engine => "/munster", :as => "webhooks"
 end

@@ -45,5 +45,24 @@ class ActiveSupport::TestCase
       at_most = exactly
       at_least = exactly
     end
+
+    # We do not make these an if/else since we allow both at_most and at_least
+    if at_most
+      error = "#{expression.inspect} changed by #{delta} which is more than #{at_most}"
+      error = "#{error}. It was #{before} and became #{after}"
+      error = "#{message.call}.\n" if message&.respond_to?(:call)
+      error = "#{message}.\n#{error}" if message && !message.respond_to?(:call)
+      assert delta <= at_most, error
+    end
+
+    if at_least
+      error = "#{expression.inspect} changed by #{delta} which is less than #{at_least}"
+      error = "#{error}. It was #{before} and became #{after}"
+      error = "#{message.call}.\n" if message&.respond_to?(:call)
+      error = "#{message}.\n#{error}" if message && !message.respond_to?(:call)
+      assert delta >= at_least, error
+    end
+
+    retval
   end
 end
