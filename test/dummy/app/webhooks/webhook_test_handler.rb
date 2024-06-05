@@ -4,11 +4,9 @@
 # if a banking provider test fails, indicating that the bank might be having an incident
 
 class WebhookTestHandler < Munster::BaseHandler
-  def self.valid?(request)
-    true
-  end
+  def valid?(request) = true
 
-  def self.process(webhook)
+  def process(webhook)
     return unless webhook.received?
     webhook.update!(status: "processing")
     webhook.update!(status: "processed")
@@ -16,7 +14,5 @@ class WebhookTestHandler < Munster::BaseHandler
     webhook.update!(status: "error")
   end
 
-  def self.expose_errors_to_sender?
-    true
-  end
+  def expose_errors_to_sender? = true
 end

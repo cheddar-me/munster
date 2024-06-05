@@ -8,7 +8,7 @@ module Munster
     end
 
     def create
-      handler = lookup_handler(params[:service_id])
+      handler = lookup_handler(params[:service_id]).new
 
       raise HandlerInactive unless handler.active?
       raise HandlerRefused unless handler.valid?(request)

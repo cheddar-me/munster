@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 class InactiveHandler < WebhookTestHandler
-  def self.active? = false
+  def active? = false
 end
