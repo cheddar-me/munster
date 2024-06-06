@@ -19,7 +19,7 @@ Munster.configure do |config|
   #
   # config.processing_job_class = WebhookProcessingJob
 
-  # We're using a common interface for error report provided by Rails, e.g Rails.error.report. In some cases
+  # We're using a common interface for error reporting provided by Rails, e.g Rails.error.report. In some cases
   # you want to enhance those errors with additional context. As example to provide a namespace:
   #
   # { appsignal: { namespace: "webhooks" } }
