@@ -20,7 +20,7 @@ module Munster
       render_error("Required parameters were not present in the request", :not_found)
     rescue => e
       Rails.error.set_context(**Munster.configuration.error_context)
-      Rails.error.report(e)
+      Rails.error.report(e, handled: true, severity: :error)
 
       if handler&.expose_errors_to_sender?
         error_for_sender_from_exception(e)
