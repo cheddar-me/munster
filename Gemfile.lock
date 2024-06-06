@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    munster (0.1.0)
+    munster (0.2.0)
       rails (>= 7.0)
 
 GEM

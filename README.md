@@ -1,4 +1,5 @@
 # Munster
+
 Munster is a Rails engine that provides a webhook endpoint for receiving and processing webhooks from various services. Engine stores received webhook first and later processes webhook in a separete async process.
 
 Source code is extracted from https://cheddar.me/ main service to be used in internal microservices. Code here could be a subject to change while we flesh out details.
@@ -16,6 +17,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
     $ gem install munster
 
 ## Usage
+
 Generate migrations and initializer file.
 
 `munster:install`
@@ -25,12 +27,14 @@ Mount munster engine in your routes.
 `mount Munster::Engine, at: "/webhooks"`
 
 ## Requirements
+
 This project depends on two dependencies:
 
 - Ruby >= 3.0
 - Rails >= 7.0
 
 ## Error reporter
+
 This gem uses [Rails common error reporter](https://guides.rubyonrails.org/error_reporting.html) to report any possible error to services like Honeybadger, Appsignal, Sentry and etc. Most of those services already support this common interface, if not - it's not that hard to add this support on your own.
 
 It's possible to provide additional context for every error. e.g.
