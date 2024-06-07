@@ -48,7 +48,7 @@ module Munster
     # on a per-handler basis - a better webhooks sender will be able to make out
     # some sense of the errors.
     def expose_errors_to_sender?
-      false
+      true
     end
 
     # Tells the controller whether this handler is active or not. This can be used
