@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative "../state_machine_enum"
+require 'state_machine_enum'
 
 module Munster
   class ReceivedWebhook < ActiveRecord::Base
     self.implicit_order_column = "created_at"
     self.table_name = "received_webhooks"
 
-    include Munster::StateMachineEnum
+    include StateMachineEnum
 
     state_machine_enum :status do |s|
       s.permit_transition(:received, :processing)
