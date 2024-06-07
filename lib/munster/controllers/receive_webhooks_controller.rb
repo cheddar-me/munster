@@ -20,7 +20,9 @@ module Munster
       render_error("Required parameters were not present in the request", :not_found)
     rescue => e
       Rails.error.set_context(**Munster.configuration.error_context)
-      Rails.error.report(e)
+      # Rails 7.1 only requires `error` attribute for .report method, but Rails 7.0 requires `handled:` attribute additionally.
+      # We're setting `handled:` and `severity:` attributes to maintain compatibility with all versions of > rails 7.
+      Rails.error.report(e, handled: true, severity: :error)
 
       if handler&.expose_errors_to_sender?
         error_for_sender_from_exception(e)
