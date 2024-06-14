@@ -4,7 +4,7 @@ Munster is a Rails engine that provides a webhook endpoint for receiving and pro
 
 Source code is extracted from https://cheddar.me/ main service to be used in internal microservices. Code here could be a subject to change while we flesh out details.
 
-Due to that, support for this gem is limited.
+Due to that, support for this gem is limited. But we're always happy to hear your feedback!
 
 ## Installation
 
