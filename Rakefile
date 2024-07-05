@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-
-APP_RAKEFILE = File.expand_path("test/dummy/Rakefile", __dir__)
-load "rails/tasks/engine.rake"
-
-load "rails/tasks/statistics.rake"
-
+require "rake/testtask"
 require "bundler/gem_tasks"
 require "standard/rake"
 
@@ -15,4 +10,17 @@ task :format do
   `bundle exec magic_frozen_string_literal .`
 end
 
-task default: %i[standard]
+Rake::TestTask.new(:test) do |t|
+  t.libs << "test"
+  t.libs << "lib"
+
+  file_name = ARGV[1]
+
+  t.test_files = if file_name
+    [file_name]
+  else
+    FileList["test/**/*_test.rb"]
+  end
+end
+
+task default: [:test, :standard]
