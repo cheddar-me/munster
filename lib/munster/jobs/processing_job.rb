@@ -25,7 +25,7 @@ module Munster
         # TODO: remove process attribute
       else
         Rails.logger.info { "Webhook #{webhook.inspect} did not pass validation and was skipped" }
-        webhook.skipped!
+        webhook.failed_validation!
       end
     end
 

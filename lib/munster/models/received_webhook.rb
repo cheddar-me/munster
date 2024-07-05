@@ -11,6 +11,7 @@ module Munster
 
     state_machine_enum :status do |s|
       s.permit_transition(:received, :processing)
+      s.permit_transition(:received, :failed_validation)
       s.permit_transition(:processing, :skipped)
       s.permit_transition(:processing, :processed)
       s.permit_transition(:processing, :error)

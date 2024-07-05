@@ -1,4 +1,4 @@
-class AddHeadersToMunsterReceivedWebhooks < ActiveRecord::Migration<%= migration_version %>
+class AddHeadersToMunsterWebhooks < ActiveRecord::Migration<%= migration_version %>
   def change
     add_column :received_webhooks, :request_headers, :jsonb, null: true
   end
