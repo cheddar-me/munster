@@ -18,6 +18,7 @@ module Munster
     end
 
     def assign_from_request(action_dispatch_request)
+      # debugger
       # Filter out all Rack-specific headers such as "rack.input" and the like. We are
       # only interested in the headers presented by the webserver
       headers = action_dispatch_request.env.filter_map do |(request_header, header_value)|
@@ -25,6 +26,13 @@ module Munster
           [request_header, header_value]
         end
       end.to_h
+
+      # Path parameters do not get parsed from the request body or the query string, but instead get set by Journey - the Rails
+      # router - when the ActionDispatch::Request object gets instantiated. They need to be preserved separately in case the Munster
+      # controller gets mounted under a parametrized path - and the path component actually is a parameter that the webhook
+      # handler either needs for validation or for processing
+      headers["action_dispatch.request.path_parameters"] = action_dispatch_request.env.fetch("action_dispatch.request.path_parameters")
+
       # If the migration hasn't been applied yet, we can't save the headers.
       if self.class.column_names.include?("request_headers")
         write_attribute("request_headers", headers)
