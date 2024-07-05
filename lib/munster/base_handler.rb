@@ -36,6 +36,22 @@ module Munster
       true
     end
 
+    # Tells the controller whether this webhook handler desires to perform validation
+    # before persisting the webhook or after. When using webhooks which are signed,
+    # one of the most frequent mistakes is to forget the credentials (the secret)
+    # for generating the webhook signature. If the controller starts rejecting the
+    # webhooks outright due to this misconfiguration, they will get missed - which
+    # is exactly one of the things Munster needs to prevent. Having a way to choose
+    # whether to validate async or inline allows a wrong credential to be added and
+    # the webhooks to get processed later. At the same time, if your webhook senders
+    # are expected to be very aggressive, you might want to perform this validation
+    # upfront, before the webhook gets saved into the database. This prevents malicious
+    # senders from spamming your DB and causing a denial-of-service on it. That's why this
+    # is made configurable.
+    def validate_async?
+      true
+    end
+
     # Default implementation just generates UUID, but if the webhook sender sends us
     # an event ID we use it for deduplication.
     def extract_event_id_from_request(action_dispatch_request)
