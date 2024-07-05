@@ -4,16 +4,19 @@ require_relative "jobs/processing_job"
 
 module Munster
   class BaseHandler
-    # Reimplement this method, it's being used in WebhooksController to store incoming webhook.
-    # Also que for processing in the end.
+    # `handle` accepts the ActionDispatch HTTP request and saves the webhook for later processing. It then
+    # enqueues an ActiveJob which will perform the processing using `process`.
+    #
+    # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
     # @return [void]
     def handle(action_dispatch_request)
       action_dispatch_request.body.read.force_encoding(Encoding::BINARY)
       request_headers, binary_body_str = Munster.action_dispatch_request_to_header_hash_and_body(action_dispatch_request)
+      handler_event_id = extract_event_id_from_request(action_dispatch_request)
       attrs = {
         body: binary_body_str,
         handler_module_name: self.class.name,
-        handler_event_id: extract_event_id_from_request(action_dispatch_request)
+        handler_event_id: handler_event_id
       }
 
       # If the migration hasn't been applied yet, we can't save the headers.
@@ -24,10 +27,9 @@ module Munster
       end
 
       webhook = Munster::ReceivedWebhook.create!(**attrs)
-
       Munster.configuration.processing_job_class.perform_later(webhook)
-    rescue ActiveRecord::RecordNotUnique # Deduplicated
-      nil
+    rescue ActiveRecord::RecordNotUnique # Webhook deduplicated
+      Rails.logger.info { "#{self.inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
     end
 
     # This method will be used to process webhook by async worker.
@@ -52,12 +54,17 @@ module Munster
     # upfront, before the webhook gets saved into the database. This prevents malicious
     # senders from spamming your DB and causing a denial-of-service on it. That's why this
     # is made configurable.
+    #
+    # @return [Boolean]
     def validate_async?
       false
     end
 
     # Default implementation just generates UUID, but if the webhook sender sends us
-    # an event ID we use it for deduplication.
+    # an event ID we use it for deduplication. A duplicate webhook is not going to be
+    # stored in the database if it is already present there.
+    #
+    # @return [String]
     def extract_event_id_from_request(action_dispatch_request)
       SecureRandom.uuid
     end
@@ -67,6 +74,8 @@ module Munster
     # data and do not disable your endpoint forcibly. We allow this to be configured
     # on a per-handler basis - a better webhooks sender will be able to make out
     # some sense of the errors.
+    #
+    # @return [Boolean]
     def expose_errors_to_sender?
       true
     end
@@ -75,6 +84,8 @@ module Munster
     # to deactivate a particular handler via feature flags for example, or use other
     # logic to determine whether the handler may be used to create new received webhooks
     # in the system. This is primarily needed for load shedding.
+    #
+    # @return [Boolean]
     def active?
       true
     end
