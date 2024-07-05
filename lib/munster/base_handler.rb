@@ -4,11 +4,6 @@ require_relative "jobs/processing_job"
 
 module Munster
   class BaseHandler
-    # Gets called from the background job
-    def self.process(...)
-      new.process(...)
-    end
-
     # Reimplement this method, it's being used in WebhooksController to store incoming webhook.
     # Also que for processing in the end.
     # @return [void]
