@@ -13,7 +13,7 @@ module Munster
 
     MISSING_HEADERS_ERROR = <<~EOS
       The webhook handler validates asynchronously, but there were no request headers saved with the webhook
-      You need to ensure you validate inline (`validate_async?` should return "false") until you have ascretained
+      You need to ensure you validate inline (`validate_async?` should return "false") until you have ensured
       that all webhooks that will be getting processed are getting saved with the request headers intact.
     EOS
 
