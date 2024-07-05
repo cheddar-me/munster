@@ -32,12 +32,19 @@ module Munster
       Rails.logger.info { "#{self.inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
     end
 
-    # This method will be used to process webhook by async worker.
+    # This is the heart of your webhook processing. Override this method and define your processing inside of it.
+    #
+    # @param received_webhook[Munster::ReceivedWebhook]
     def process(received_webhook)
     end
 
-    # This method verifies that request actually comes from provider:
-    # signature validation, HTTP authentication, IP whitelisting and the like
+    # This method verifies that request is not malformed and actually comes from the webhook sender:
+    # signature validation, HTTP authentication, IP whitelisting and the like. Depending on whether you validate
+    # sync or async, the `action_dispatch_request` may be a reconstructed HTTP request (but most of Rails methods
+    # will still be available on it).
+    #
+    # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
+    # @return [Boolean]
     def valid?(action_dispatch_request)
       true
     end
@@ -54,6 +61,9 @@ module Munster
     # upfront, before the webhook gets saved into the database. This prevents malicious
     # senders from spamming your DB and causing a denial-of-service on it. That's why this
     # is made configurable.
+    #
+    # To preserve backwards compatibility with our own handlers we already have,
+    # we default it to `false`. The default is going to be `true` in future versions of Munster.
     #
     # @return [Boolean]
     def validate_async?
