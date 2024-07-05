@@ -9,7 +9,7 @@ module Munster
     end
 
     def create
-      handler = lookup_handler(params[:service_id]).new
+      handler = lookup_handler(params[:service_id])
 
       raise HandlerInactive unless handler.active?
       raise HandlerRefused if !handler.validate_async? && !handler.valid?(request)
@@ -19,6 +19,7 @@ module Munster
     rescue KeyError # handler was not found, so we return generic 404 error.
       render_error("Required parameters were not present in the request", :not_found)
     rescue => e
+      raise e
       Rails.error.set_context(**Munster.configuration.error_context)
       # Rails 7.1 only requires `error` attribute for .report method, but Rails 7.0 requires `handled:` attribute additionally.
       # We're setting `handled:` and `severity:` attributes to maintain compatibility with all versions of > rails 7.
