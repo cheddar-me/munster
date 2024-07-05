@@ -4,10 +4,10 @@ class TestHandlerTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   test "can process" do
-    record = received_webhooks(:received_provider_disruption)
+    received_webhook = received_webhooks(:received_provider_disruption)
 
-    WebhookTestHandler.process(record)
+    WebhookTestHandler.new.process(received_webhook)
 
-    assert_equal("processed", record.reload.status)
+    assert_equal("processed", received_webhook.reload.status)
   end
 end

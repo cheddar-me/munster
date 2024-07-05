@@ -10,26 +10,16 @@ module Munster
     # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
     # @return [void]
     def handle(action_dispatch_request)
-      action_dispatch_request.body.read.force_encoding(Encoding::BINARY)
-      request_headers, binary_body_str = Munster.action_dispatch_request_to_header_hash_and_body(action_dispatch_request)
+      handler_module_name = is_a?(Munster::BaseHandler) ? self.class.name : to_s
       handler_event_id = extract_event_id_from_request(action_dispatch_request)
-      attrs = {
-        body: binary_body_str,
-        handler_module_name: self.class.name,
-        handler_event_id: handler_event_id
-      }
 
-      # If the migration hasn't been applied yet, we can't save the headers.
-      if Munster::ReceivedWebhook.column_names.include?("request_headers")
-        attrs[:request_headers] = request_headers
-      else
-        Rails.logger.warn { "You need to run Munster migrations so that request headers can be persisted with the model. Async validation is not going to work without that column being set." }
-      end
+      webhook = Munster::ReceivedWebhook.new(handler_event_id: handler_event_id, handler_module_name: handler_module_name)
+      webhook.assign_from_request(action_dispatch_request)
+      webhook.save!
 
-      webhook = Munster::ReceivedWebhook.create!(**attrs)
       Munster.configuration.processing_job_class.perform_later(webhook)
     rescue ActiveRecord::RecordNotUnique # Webhook deduplicated
-      Rails.logger.info { "#{self.inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
+      Rails.logger.info { "#{inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
     end
 
     # This is the heart of your webhook processing. Override this method and define your processing inside of it.
