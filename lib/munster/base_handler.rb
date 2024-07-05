@@ -13,12 +13,21 @@ module Munster
     # Also que for processing in the end.
     # @return [void]
     def handle(action_dispatch_request)
-      binary_body_str = action_dispatch_request.body.read.force_encoding(Encoding::BINARY)
+      action_dispatch_request.body.read.force_encoding(Encoding::BINARY)
+      request_headers, binary_body_str = Munster.action_dispatch_request_to_header_hash_and_body(action_dispatch_request)
       attrs = {
         body: binary_body_str,
         handler_module_name: self.class.name,
         handler_event_id: extract_event_id_from_request(action_dispatch_request)
       }
+
+      # If the migration hasn't been applied yet, we can't save the headers.
+      if Munster::ReceivedWebhook.column_names.include?("request_headers")
+        attrs[:request_headers] = request_headers
+      else
+        Rails.logger.warn { "You need to run Munster migrations so that request headers can be persisted with the model. Async validation is not going to work without that column being set." }
+      end
+
       webhook = Munster::ReceivedWebhook.create!(**attrs)
 
       Munster.configuration.processing_job_class.perform_later(webhook)
@@ -49,7 +58,7 @@ module Munster
     # senders from spamming your DB and causing a denial-of-service on it. That's why this
     # is made configurable.
     def validate_async?
-      true
+      false
     end
 
     # Default implementation just generates UUID, but if the webhook sender sends us

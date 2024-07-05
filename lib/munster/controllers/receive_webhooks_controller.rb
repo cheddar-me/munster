@@ -12,7 +12,7 @@ module Munster
       handler = lookup_handler(params[:service_id]).new
 
       raise HandlerInactive unless handler.active?
-      raise HandlerRefused unless handler.valid?(request)
+      raise HandlerRefused if !handler.validate_async? && !handler.valid?(request)
 
       handler.handle(request)
       head :ok

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'state_machine_enum'
+require "state_machine_enum"
 
 module Munster
   class ReceivedWebhook < ActiveRecord::Base
