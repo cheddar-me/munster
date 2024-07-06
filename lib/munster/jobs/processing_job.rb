@@ -4,7 +4,6 @@ require "active_job" if defined?(Rails)
 
 module Munster
   class ProcessingJob < ActiveJob::Base
-
     def perform(webhook)
       if valid?(webhook)
         # TODO: there should be some sort of locking or concurrency control here, but it's outside of

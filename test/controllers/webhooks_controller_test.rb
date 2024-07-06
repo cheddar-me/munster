@@ -4,12 +4,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   setup { @body_str = received_webhooks(:received_provider_disruption).body }
 
   test "accepts a customer.io webhook with changed notification preferences" do
+    Munster::ReceivedWebhook.delete_all
+
     post "/munster/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 200
 
     webhook = Munster::ReceivedWebhook.last!
 
-    assert_equal WebhookTestHandler, webhook.handler.class
+    assert_equal WebhookTestHandler, webhook.handler
     assert_equal webhook.status, "received"
     assert_equal webhook.body, @body_str
   end
@@ -23,14 +25,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     post "/munster/inactive", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 503
-    assert_equal "Webhook handler is inactive", response.parsed_body["error"]
+    assert_equal 'Webhook handler "inactive" is inactive', response.parsed_body["error"]
   end
 
   test "invalid handlers" do
     post "/munster/invalid", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 403
-    assert_equal "Webhook handler did not validate the request (signature or authentication may be invalid)", response.parsed_body["error"]
+    assert_equal 'Webhook handler "invalid" did not validate the request (signature or authentication may be invalid)', response.parsed_body["error"]
   end
 
   test "does not expose errors to the caller if the handler does not" do

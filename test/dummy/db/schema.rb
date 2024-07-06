@@ -22,5 +22,4 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_05_180333) do
     t.index ["handler_module_name", "handler_event_id"], name: "webhook_dedup_idx", unique: true
     t.index ["status"], name: "index_received_webhooks_on_status"
   end
-
 end

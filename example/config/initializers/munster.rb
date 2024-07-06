@@ -3,5 +3,7 @@
 require_relative "../../app/webhooks/webhook_test_handler"
 
 Munster.configure do |config|
-  config.active_handlers = [WebhookTestHandler]
+  config.active_handlers = {
+    "test-handler" => "WebhookTestHandler"
+  }
 end
