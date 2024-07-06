@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_23_125859) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_05_180333) do
   create_table "received_webhooks", force: :cascade do |t|
     t.string "handler_event_id", null: false
     t.string "handler_module_name", null: false
@@ -18,7 +18,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_23_125859) do
     t.binary "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "request_headers"
     t.index ["handler_module_name", "handler_event_id"], name: "webhook_dedup_idx", unique: true
     t.index ["status"], name: "index_received_webhooks_on_status"
   end
+
 end
