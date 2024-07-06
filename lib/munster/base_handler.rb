@@ -9,7 +9,7 @@ module Munster
     #
     # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
     # @return [void]
-    def self.handle(action_dispatch_request)
+    def handle(action_dispatch_request)
       handler_module_name = is_a?(Munster::BaseHandler) ? self.class.name : to_s
       handler_event_id = extract_event_id_from_request(action_dispatch_request)
 
@@ -28,7 +28,7 @@ module Munster
     #
     # @param received_webhook[Munster::ReceivedWebhook]
     # @return [void]
-    def self.process(received_webhook)
+    def process(received_webhook)
     end
 
     # This method verifies that request is not malformed and actually comes from the webhook sender:
@@ -41,7 +41,7 @@ module Munster
     # @see Munster::ReceivedWebhook#revived_request
     # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
     # @return [Boolean]
-    def self.valid?(action_dispatch_request)
+    def valid?(action_dispatch_request)
       true
     end
 
@@ -62,7 +62,7 @@ module Munster
     # we default it to `false`. The default is going to be `true` in future versions of Munster.
     #
     # @return [Boolean]
-    def self.validate_async?
+    def validate_async?
       false
     end
 
@@ -71,7 +71,7 @@ module Munster
     # stored in the database if it is already present there.
     #
     # @return [String]
-    def self.extract_event_id_from_request(action_dispatch_request)
+    def extract_event_id_from_request(action_dispatch_request)
       SecureRandom.uuid
     end
 
@@ -82,7 +82,7 @@ module Munster
     # some sense of the errors.
     #
     # @return [Boolean]
-    def self.expose_errors_to_sender?
+    def expose_errors_to_sender?
       true
     end
 
@@ -92,7 +92,7 @@ module Munster
     # in the system. This is primarily needed for load shedding.
     #
     # @return [Boolean]
-    def self.active?
+    def active?
       true
     end
   end

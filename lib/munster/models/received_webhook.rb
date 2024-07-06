@@ -101,7 +101,7 @@ module Munster
     end
 
     def handler
-      handler_module_name.constantize
+      handler_module_name.constantize.new
     end
   end
 end

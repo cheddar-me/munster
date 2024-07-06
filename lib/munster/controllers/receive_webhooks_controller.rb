@@ -59,8 +59,9 @@ module Munster
       # We need to support both, because `MyHandler` is not loaded yet when Rails initializers run.
       # Zeitwerk takes over after the initializers. So we can't really use a module in the init cycle just yet.
       # We can, however, use the module name - and resolve it lazily, later.
-      handler_module_or_module_name = active_handlers.fetch(service_id_str)
-      handler_module_or_module_name.respond_to?(:constantize) ? handler_module_or_module_name.constantize : handler_module_or_module_name
+      handler_class_or_class_name = active_handlers.fetch(service_id_str)
+      handler_class = handler_class_or_class_name.respond_to?(:constantize) ? handler_class_or_class_name.constantize : handler_class_or_class_name
+      handler_class.new
     rescue KeyError
       raise UnknownHandler
     end

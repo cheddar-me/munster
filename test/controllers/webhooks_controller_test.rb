@@ -11,7 +11,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     webhook = Munster::ReceivedWebhook.last!
 
-    assert_equal WebhookTestHandler, webhook.handler
+    assert_equal "WebhookTestHandler", webhook.handler_module_name
     assert_equal webhook.status, "received"
     assert_equal webhook.body, @body_str
   end
