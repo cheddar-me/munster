@@ -33,14 +33,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Webhook handler did not validate the request (signature or authentication may be invalid)", response.parsed_body["error"]
   end
 
-  test "will not expose errors, if handler doesn't do that" do
+  test "does not expose errors to the caller if the handler does not" do
     post "/munster/private", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 200
     assert_nil response.parsed_body["error"]
   end
 
-  test "saves only one webhook" do
+  test "deduplicates received webhooks based on the event ID" do
     body = {event_id: SecureRandom.uuid, body: "test"}.to_json
 
     assert_changes_by -> { Munster::ReceivedWebhook.count }, exactly: 1 do
@@ -49,5 +49,18 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
         assert_response 200
       end
     end
+  end
+
+  test "preserves the route params and the request params in the serialised request stored with the webhook" do
+    body = {user_name: "John", number_of_dependents: 14}.to_json
+
+    Munster::ReceivedWebhook.delete_all
+    post "/per-user-munster/123/private", params: body, headers: {"CONTENT_TYPE" => "application/json"}
+
+    received_webhook = Munster::ReceivedWebhook.first!
+    assert_equal body, received_webhook.request.body.read
+    assert_equal "John", received_webhook.request.params["user_name"]
+    assert_equal 14, received_webhook.request.params["number_of_dependents"]
+    assert_equal "123", received_webhook.request.params["user_id"]
   end
 end

@@ -4,6 +4,20 @@ require "state_machine_enum"
 
 module Munster
   class ReceivedWebhook < ActiveRecord::Base
+    MISSING_HEADERS_COLUMN_ERROR = <<~EOS
+      You are trying to access the full HTTP request inside .process() or .valid? , but there is no column in the database
+      to save the headers in. Webhook signatures (which you usually want to validate) will normally be injected into
+      the webhook request headers, in the form of an "X-Signature" header or similar. You need to run the migration
+      to add the column to the `received_webhooks' table before you will be able to use async validation.
+    EOS
+
+    MISSING_HEADERS_ERROR = <<~EOS
+      You are trying to access the full HTTP request inside .process() or .valid? but there were no
+      request headers saved with the webhook. You need to ensure you validate inline (`validate_async?`
+      should return "false") until you have ensured that all webhooks that will be getting processed
+      are getting saved with the request headers intact.
+    EOS
+
     self.implicit_order_column = "created_at"
     self.table_name = "received_webhooks"
 
@@ -20,16 +34,15 @@ module Munster
     # Store the pertinent data from an ActionDispatch::Request into the webhook.
     # @param [ActionDispatch::Request]
     def request=(action_dispatch_request)
-      # debugger
       # Filter out all Rack-specific headers such as "rack.input" and the like. We are
-      # only interested in the headers presented by the webserver
+      # only interested in the actual HTTP headers presented by the webserver. Mostly...
       headers = action_dispatch_request.env.filter_map do |(request_header, header_value)|
         if request_header.is_a?(String) && request_header.upcase == request_header && header_value.is_a?(String)
           [request_header, header_value]
         end
       end.to_h
 
-      # Path parameters do not get parsed from the request body or the query string, but instead get set by Journey - the Rails
+      # ...except the path parameters - they do not get parsed from the headers, but instead get set by Journey - the Rails
       # router - when the ActionDispatch::Request object gets instantiated. They need to be preserved separately in case the Munster
       # controller gets mounted under a parametrized path - and the path component actually is a parameter that the webhook
       # handler either needs for validation or for processing
@@ -81,6 +94,8 @@ module Munster
     #
     # @return [ActionDispatch::Request]
     def request
+      raise MISSING_HEADERS_COLUMN_ERROR unless self.class.column_names.include?("request_headers")
+      raise MISSING_HEADERS_ERROR if request_headers.blank?
       headers = try(:request_headers) || {}
       ActionDispatch::Request.new(headers.merge!("rack.input" => StringIO.new(body.to_s.b)))
     end
