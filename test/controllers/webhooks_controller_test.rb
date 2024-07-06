@@ -58,6 +58,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     Munster::ReceivedWebhook.delete_all
     post "/per-user-munster/123/private", params: body, headers: {"CONTENT_TYPE" => "application/json"}
+    assert_response 200
 
     received_webhook = Munster::ReceivedWebhook.first!
     assert_equal body, received_webhook.request.body.read
