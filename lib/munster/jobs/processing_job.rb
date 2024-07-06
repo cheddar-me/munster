@@ -35,7 +35,7 @@ module Munster
       raise MISSING_HEADERS_COLUMN_ERROR unless webhook.class.column_names.include?("request_headers")
       raise MISSING_HEADERS_ERROR if webhook.request_headers.blank?
 
-      webhook.handler.valid?(webhook.revived_request)
+      webhook.handler.valid?(webhook.request)
     end
   end
 end

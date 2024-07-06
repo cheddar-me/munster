@@ -19,7 +19,7 @@ module Munster
 
     # Store the pertinent data from an ActionDispatch::Request into the webhook.
     # @param [ActionDispatch::Request]
-    def revived_request=(action_dispatch_request)
+    def request=(action_dispatch_request)
       # debugger
       # Filter out all Rack-specific headers such as "rack.input" and the like. We are
       # only interested in the headers presented by the webserver
@@ -80,7 +80,7 @@ module Munster
     # (as were decoded by your routes) etc. But it should be sufficient to do the basic tasks to process a webhook.
     #
     # @return [ActionDispatch::Request]
-    def revived_request
+    def request
       headers = try(:request_headers) || {}
       ActionDispatch::Request.new(headers.merge!("rack.input" => StringIO.new(body.to_s.b)))
     end
