@@ -14,10 +14,6 @@ if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
   ActiveSupport::TestCase.fixtures :all
 end
 
-def post_json(path, obj)
-  post path, params: obj.to_json, headers: {"CONTENT_TYPE" => "application/json"}
-end
-
 class ActiveSupport::TestCase
   fixtures :all
   # Same as "assert_changes" in Rails but for countable entities.
