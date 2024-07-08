@@ -3,6 +3,20 @@ require "test_helper"
 class WebhooksControllerTest < ActionDispatch::IntegrationTest
   setup { @body_str = received_webhooks(:received_provider_disruption).body }
 
+  class TestApp < Munster::Engine
+  end
+
+  Munster.configure do |config|
+    config.active_handlers = {
+      test: WebhookTestHandler,
+      inactive: "InactiveHandler",
+      invalid: "InvalidHandler",
+      private: "PrivateHandler",
+      extract_id: "ExtractIdHandler"
+    }
+  end
+  self.app = Munster::Engine
+
   test "accepts a customer.io webhook with changed notification preferences" do
     Munster::ReceivedWebhook.delete_all
 
