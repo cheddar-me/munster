@@ -17,7 +17,7 @@ module Munster
       require_relative "install_generator"
     end
 
-    routes.draw do
+    routes do
       post "/:service_id" => "received_webhooks#create"
     end
   end

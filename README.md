@@ -27,7 +27,7 @@ Generate migrations and initializer file.
 Mount munster engine in your routes.
 
 ```ruby
-mount Munster::Engine, at: "/webhooks"`
+mount Munster::Engine, at: "/webhooks"
 ```
 
 ## Requirements

@@ -1,9 +1,17 @@
 require "test_helper"
+require_relative "../test_app"
 
 class WebhooksControllerTest < ActionDispatch::IntegrationTest
-  setup { @body_str = received_webhooks(:received_provider_disruption).body }
-
-  class TestApp < Munster::Engine
+  setup do
+    @body_str = <<~JSON
+      {
+        "provider_id": "musterbank-flyio",
+        "starts_at": "<%= Time.now.utc %>",
+        "external_source": "The Forge Of Downtime",
+        "external_ticket_title": "DOWN-123",
+        "internal_description_markdown": "A test has failed"
+      }
+    JSON
   end
 
   Munster.configure do |config|
@@ -15,12 +23,16 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
       extract_id: "ExtractIdHandler"
     }
   end
-  self.app = Munster::Engine
+  self.app = MunsterTestApp
+
+  def test_spoo
+    warn "pang"
+  end
 
   test "accepts a customer.io webhook with changed notification preferences" do
     Munster::ReceivedWebhook.delete_all
 
-    post "/munster/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+    post "/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 200
 
     webhook = Munster::ReceivedWebhook.last!
@@ -31,29 +43,29 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "will throw a proper error, if service_id is not handled" do
-    post "/munster/missing_service", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+    post "/missing_service", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 404
   end
 
   test "inactive handlers" do
-    post "/munster/inactive", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+    post "/inactive", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 503
     assert_equal 'Webhook handler "inactive" is inactive', response.parsed_body["error"]
   end
 
   test "invalid handlers" do
-    post "/munster/invalid", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+    post "/invalid", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 403
     assert_equal 'Webhook handler "invalid" did not validate the request (signature or authentication may be invalid)', response.parsed_body["error"]
   end
 
-  test "does not expose errors to the caller if the handler does not" do
-    post "/munster/private", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+  test "does not respond with a non-OK status but does return an error to the caller if the handler does not want to expose errors" do
+    post "/private", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 200
-    assert_nil response.parsed_body["error"]
+    assert response.parsed_body["error"]
   end
 
   test "deduplicates received webhooks based on the event ID" do
@@ -61,7 +73,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     assert_changes_by -> { Munster::ReceivedWebhook.count }, exactly: 1 do
       3.times do
-        post "/munster/extract_id", params: body, headers: {"CONTENT_TYPE" => "application/json"}
+        post "/extract_id", params: body, headers: {"CONTENT_TYPE" => "application/json"}
         assert_response 200
       end
     end
