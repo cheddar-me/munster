@@ -34,39 +34,24 @@ module Munster
     # This method verifies that request is not malformed and actually comes from the webhook sender:
     # signature validation, HTTP authentication, IP whitelisting and the like. There is a difference depending
     # on whether you validate sync (in the receiving controller) or async (in the processing job):
+    # Validation is async - it takes place in the background job that gets enqueued to process the webhook.
+    # The `action_dispatch_request` will be reconstructed from the `ReceivedWebhook` data. Background validation
+    # is used because the most common misconfiguration that may occur is usually forgetting or misidentifying the
+    # signature for signed webhooks. If such a misconfiguration has taken place, the background validation
+    # (instead of rejecting the webhook at input) permits you to still process the webhook once the secrets
+    # have been configured correctly.
     #
-    # * With sync validation, the `action_dispatch_request` will be the actual HTTP request from the controller
-    # * With async validation, the `action_dispatch_request` will be reconstructed from the saved webhook
+    # If this method returns `false`, the webhook will be marked as `failed_validation` in the database. If this
+    # method returns `true`, the `process` method of the handler is going to be called.
     #
-    # @see Munster::ReceivedWebhook#revived_request
-    # @param action_dispatch_request[ActionDispatch::Request] the request from the controller
+    # @see Munster::ReceivedWebhook#request
+    # @param action_dispatch_request[ActionDispatch::Request] the reconstructed request from the controller
     # @return [Boolean]
     def valid?(action_dispatch_request)
       true
     end
 
-    # Tells the controller whether this webhook handler desires to perform validation
-    # before persisting the webhook or after. When using webhooks which are signed,
-    # one of the most frequent mistakes is to forget the credentials (the secret)
-    # for generating the webhook signature. If the controller starts rejecting the
-    # webhooks outright due to this misconfiguration, they will get missed - which
-    # is exactly one of the things Munster needs to prevent. Having a way to choose
-    # whether to validate async or inline allows a wrong credential to be added and
-    # the webhooks to get processed later. At the same time, if your webhook senders
-    # are expected to be very aggressive, you might want to perform this validation
-    # upfront, before the webhook gets saved into the database. This prevents malicious
-    # senders from spamming your DB and causing a denial-of-service on it. That's why this
-    # is made configurable.
-    #
-    # To preserve backwards compatibility with our own handlers we already have,
-    # we default it to `false`. The default is going to be `true` in future versions of Munster.
-    #
-    # @return [Boolean]
-    def validate_async?
-      false
-    end
-
-    # Default implementation just generates UUID, but if the webhook sender sends us
+    # Default implementation just generates a random UUID, but if the webhook sender sends us
     # an event ID we use it for deduplication. A duplicate webhook is not going to be
     # stored in the database if it is already present there.
     #

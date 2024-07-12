@@ -2,9 +2,6 @@
 
 module Munster
   class ReceiveWebhooksController < ActionController::API
-    class InvalidRequest < StandardError
-    end
-
     class HandlerInactive < StandardError
     end
 
@@ -14,7 +11,6 @@ module Munster
     def create
       handler = lookup_handler(service_id)
       raise HandlerInactive unless handler.active?
-      raise InvalidRequest if !handler.validate_async? && !handler.valid?(request)
       handler.handle(request)
       render(json: {ok: true, error: nil})
     rescue => e

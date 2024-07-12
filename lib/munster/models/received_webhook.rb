@@ -4,20 +4,6 @@ require "state_machine_enum"
 
 module Munster
   class ReceivedWebhook < ActiveRecord::Base
-    MISSING_HEADERS_COLUMN_ERROR = <<~EOS
-      You are trying to access the full HTTP request inside .process() or .valid? , but there is no column in the database
-      to save the headers in. Webhook signatures (which you usually want to validate) will normally be injected into
-      the webhook request headers, in the form of an "X-Signature" header or similar. You need to run the migration
-      to add the column to the `received_webhooks' table before you will be able to use async validation.
-    EOS
-
-    MISSING_HEADERS_ERROR = <<~EOS
-      You are trying to access the full HTTP request inside .process() or .valid? but there were no
-      request headers saved with the webhook. You need to ensure you validate inline (`validate_async?`
-      should return "false") until you have ensured that all webhooks that will be getting processed
-      are getting saved with the request headers intact.
-    EOS
-
     self.implicit_order_column = "created_at"
     self.table_name = "received_webhooks"
 
@@ -36,9 +22,9 @@ module Munster
     def request=(action_dispatch_request)
       # Filter out all Rack-specific headers such as "rack.input" and the like. We are
       # only interested in the actual HTTP headers presented by the webserver. Mostly...
-      headers = action_dispatch_request.env.filter_map do |(request_header, header_value)|
-        if request_header.is_a?(String) && request_header.upcase == request_header && header_value.is_a?(String)
-          [request_header, header_value]
+      headers = action_dispatch_request.env.filter_map do |(header_name, header_value)|
+        if header_name.is_a?(String) && header_name.upcase == header_name && header_value.is_a?(String)
+          [header_name, header_value]
         end
       end.to_h
 
@@ -48,15 +34,11 @@ module Munster
       # handler either needs for validation or for processing
       headers["action_dispatch.request.path_parameters"] = action_dispatch_request.env.fetch("action_dispatch.request.path_parameters")
 
-      # If the migration hasn't been applied yet, we can't save the headers.
-      if self.class.column_names.include?("request_headers")
-        write_attribute("request_headers", headers)
-      else
-        Rails.logger.warn { "You need to run Munster migrations so that request headers can be persisted with the model. Async validation is not going to work without that column being set." }
-      end
-      write_attribute("body", action_dispatch_request.body.read.force_encoding(Encoding::BINARY))
-    ensure
-      action_dispatch_request.body.rewind
+      # ...and the raw request body - because we already save it separately
+      body_bytes = headers.delete("RAW_POST_DATA")
+
+      write_attribute("body", body_bytes.force_encoding(Encoding::BINARY))
+      write_attribute("request_headers", headers)
     end
 
     # A Munster handler is, in a way, a tiny Rails controller which runs in a background job. To allow this,
@@ -94,10 +76,7 @@ module Munster
     #
     # @return [ActionDispatch::Request]
     def request
-      raise MISSING_HEADERS_COLUMN_ERROR unless self.class.column_names.include?("request_headers")
-      raise MISSING_HEADERS_ERROR if request_headers.blank?
-      headers = try(:request_headers) || {}
-      ActionDispatch::Request.new(headers.merge!("rack.input" => StringIO.new(body.to_s.b)))
+      ActionDispatch::Request.new(request_headers.merge!("rack.input" => StringIO.new(body.to_s.b)))
     end
 
     def handler
