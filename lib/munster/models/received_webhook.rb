@@ -35,10 +35,13 @@ module Munster
       headers["action_dispatch.request.path_parameters"] = action_dispatch_request.env.fetch("action_dispatch.request.path_parameters")
 
       # ...and the raw request body - because we already save it separately
-      body_bytes = headers.delete("RAW_POST_DATA")
+      headers.delete("RAW_POST_DATA")
 
-      write_attribute("body", body_bytes.force_encoding(Encoding::BINARY))
+      request_body_io = action_dispatch_request.env.fetch("rack.input")
+      write_attribute("body", request_body_io.read.force_encoding(Encoding::BINARY))
       write_attribute("request_headers", headers)
+    ensure
+      request_body_io.rewind
     end
 
     # A Munster handler is, in a way, a tiny Rails controller which runs in a background job. To allow this,

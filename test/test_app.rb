@@ -33,9 +33,10 @@ class MunsterTestApp < Rails::Application
   config.consider_all_requests_local = true
   config.secret_key_base = 'i_am_a_secret'
   config.active_support.cache_format_version = 7.0
+  config.hosts << ->(host) { true } # Permit all hosts
 
   routes.append do
-    mount Munster::Engine, at: "/wehbooks"
+    mount Munster::Engine, at: "/munster"
     post "/per-user-munster/:user_id/private" => "munster/receive_webhooks#create"
   end
 end

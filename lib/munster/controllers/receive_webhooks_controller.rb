@@ -14,6 +14,12 @@ module Munster
       handler.handle(request)
       render(json: {ok: true, error: nil})
     rescue => e
+      warn e
+      warn e.backtrace
+      # If exposing errors to sender is desired we can let the standard Rails stack take over
+      # the error handling. This will differ depending on the environment the app runs in.
+      raise e if handler && handler.expose_errors_to_sender?
+
       Rails.error.set_context(**Munster.configuration.error_context)
       # Rails 7.1 only requires `error` attribute for .report method, but Rails 7.0 requires `handled:` attribute additionally.
       # We're setting `handled:` and `severity:` attributes to maintain compatibility with all versions of > rails 7.
@@ -26,24 +32,21 @@ module Munster
     end
 
     def error_for_sender_from_exception(e, maybe_handler)
-      force_ok = !maybe_handler.try(:expose_errors_to_sender?)
       case e
       when UnknownHandler
-        render_error("No handler found for #{service_id.inspect}", :not_found)
-      when InvalidRequest
-        render_error("Webhook handler #{service_id.inspect} did not validate the request (signature or authentication may be invalid)", force_ok ? :ok : :forbidden)
+        render_error_with_ok_status("No handler found for #{service_id.inspect}")
       when HandlerInactive
-        render_error("Webhook handler #{service_id.inspect} is inactive", force_ok ? :ok : :service_unavailable)
+        render_error_with_ok_status("Webhook handler #{service_id.inspect} is inactive")
       when JSON::ParserError
-        render_error("Request body is not valid JSON", force_ok ? :ok : :bad_request)
+        render_error_with_ok_status("Request body is not valid JSON")
       else
-        render_error("Internal error", force_ok ? :ok : :internal_server_error)
+        render_error_with_ok_status("Internal error")
       end
     end
 
-    def render_error(message_str, status_sym)
+    def render_error_with_ok_status(message_str)
       json = {ok: false, error: message_str}.to_json
-      render(json: json, status: status_sym)
+      render(json: json, status: :ok)
     end
 
     def lookup_handler(service_id_str)
