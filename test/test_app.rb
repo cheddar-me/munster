@@ -39,7 +39,7 @@ class MunsterTestApp < Rails::Application
 
   routes.append do
     mount Munster::Engine, at: "/munster"
-    post "/per-user-munster/:user_id/private" => "munster/receive_webhooks#create"
+    post "/per-user-munster/:user_id/:service_id" => "munster/receive_webhooks#create"
   end
 end
 
