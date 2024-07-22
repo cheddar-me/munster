@@ -20,6 +20,8 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
       inactive: "InactiveHandler",
       invalid: "InvalidHandler",
       private: "PrivateHandler",
+      "failing-with-exposed-errors": "FailingWithExposedErrors",
+      "failing-with-concealed-errors": "FailingWithConcealedErrors",
       extract_id: "ExtractIdHandler"
     }
   end
@@ -54,12 +56,20 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal 'Webhook handler "inactive" is inactive', response.parsed_body["error"]
   end
 
-  test "does not respond with a non-OK status but does return an error to the caller if the handler does not want to expose errors" do
-    post "/munster/private", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
+  test "returns a 200 status and error message if the handler does not expose errors" do
+    post "/munster/failing-with-concealed-errors", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 200
     assert_equal false, response.parsed_body["ok"]
     assert response.parsed_body["error"]
+  end
+
+  test "returns a 500 status and error message if the handler does not expose errors" do
+    post "/munster/failing-with-exposed-errors", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
+
+    assert_response 500
+    # The response generation in this case is done by Rails, through the
+    # common Rails error page
   end
 
   test "deduplicates received webhooks based on the event ID" do
