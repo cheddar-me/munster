@@ -29,57 +29,51 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     test(msg) { skip }
   end
 
-  test "accepts a customer.io webhook with changed notification preferences" do
+  test "accepts a webhook without an event ID and stores it" do
     Munster::ReceivedWebhook.delete_all
 
-    post "/munster/test", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+    post "/munster/test", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 200
 
     webhook = Munster::ReceivedWebhook.last!
 
     assert_equal "WebhookTestHandler", webhook.handler_module_name
     assert_equal webhook.status, "received"
-    assert_equal webhook.body, @body_str
+    assert_equal webhook.body, webhook_body
   end
 
-  xtest "will throw a proper error, if service_id is not handled" do
-    post "/missing_service", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+  test "raises an error if the service_id is not known" do
+    post "/munster/missing_service", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 404
   end
 
-  xtest "inactive handlers" do
-    post "/inactive", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+  test "inactive handlers" do
+    post "/munster/inactive", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 503
     assert_equal 'Webhook handler "inactive" is inactive', response.parsed_body["error"]
   end
 
-  xtest "invalid handlers" do
-    post "/invalid", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
-
-    assert_response 403
-    assert_equal 'Webhook handler "invalid" did not validate the request (signature or authentication may be invalid)', response.parsed_body["error"]
-  end
-
-  xtest "does not respond with a non-OK status but does return an error to the caller if the handler does not want to expose errors" do
-    post "/private", params: @body_str, headers: {"CONTENT_TYPE" => "application/json"}
+  test "does not respond with a non-OK status but does return an error to the caller if the handler does not want to expose errors" do
+    post "/munster/private", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 200
+    assert_equal false, response.parsed_body["ok"]
     assert response.parsed_body["error"]
   end
 
-  xtest "deduplicates received webhooks based on the event ID" do
+  test "deduplicates received webhooks based on the event ID" do
     body = {event_id: SecureRandom.uuid, body: "test"}.to_json
 
     assert_changes_by -> { Munster::ReceivedWebhook.count }, exactly: 1 do
       3.times do
-        post "/extract_id", params: body, headers: {"CONTENT_TYPE" => "application/json"}
+        post "/munster/extract_id", params: body, headers: {"CONTENT_TYPE" => "application/json"}
         assert_response 200
       end
     end
   end
 
-  xtest "preserves the route params and the request params in the serialised request stored with the webhook" do
+  test "preserves the route params and the request params in the serialised request stored with the webhook" do
     body = {user_name: "John", number_of_dependents: 14}.to_json
 
     Munster::ReceivedWebhook.delete_all

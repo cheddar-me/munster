@@ -1,7 +1,7 @@
 # ENV["RAILS_ENV"] = "test"
-# 
+#
 # require "rails/all"
-# 
+#
 # database = 'development.sqlite3'
 # ENV['DATABASE_URL'] = "sqlite3:#{database}"
 # ENV['DATABASE_URL'] = "sqlite3:#{database}"
@@ -10,7 +10,7 @@
 # ActiveRecord::Schema.define do
 #   create_table :posts, force: true do |t|
 #   end
-# 
+#
 #   create_table :comments, force: true do |t|
 #     t.integer :post_id
 #   end
