@@ -9,44 +9,31 @@ module Munster
     end
 
     def create
+      Rails.error.set_context(**Munster.configuration.error_context)
       handler = lookup_handler(service_id)
       raise HandlerInactive unless handler.active?
       handler.handle(request)
       render(json: {ok: true, error: nil})
-    rescue => e
-      warn e
-      warn e.backtrace
-      # If exposing errors to sender is desired we can let the standard Rails stack take over
-      # the error handling. This will differ depending on the environment the app runs in.
-      raise e if handler && handler.expose_errors_to_sender?
-
-      Rails.error.set_context(**Munster.configuration.error_context)
-      # Rails 7.1 only requires `error` attribute for .report method, but Rails 7.0 requires `handled:` attribute additionally.
-      # We're setting `handled:` and `severity:` attributes to maintain compatibility with all versions of > rails 7.
+    rescue UnknownHandler => e
       Rails.error.report(e, handled: true, severity: :error)
-      error_for_sender_from_exception(e, handler)
+      render_error_with_status("No handler found for #{service_id.inspect}", status: :not_found)
+    rescue HandlerInactive => e
+      Rails.error.report(e, handled: true, severity: :error)
+      render_error_with_status("Webhook handler #{service_id.inspect} is inactive", status: :service_unavailable)
+    rescue => e
+      raise e unless handler
+      raise e if handler.expose_errors_to_sender?
+      Rails.error.report(e, handled: true, severity: :error)
+      render_error_with_status("Internal error (#{e})")
     end
 
     def service_id
       params.require(:service_id)
     end
 
-    def error_for_sender_from_exception(e, maybe_handler)
-      case e
-      when UnknownHandler
-        render_error_with_ok_status("No handler found for #{service_id.inspect}")
-      when HandlerInactive
-        render_error_with_ok_status("Webhook handler #{service_id.inspect} is inactive")
-      when JSON::ParserError
-        render_error_with_ok_status("Request body is not valid JSON")
-      else
-        render_error_with_ok_status("Internal error")
-      end
-    end
-
-    def render_error_with_ok_status(message_str)
+    def render_error_with_status(message_str, status: :ok)
       json = {ok: false, error: message_str}.to_json
-      render(json: json, status: :ok)
+      render(json: json, status: status)
     end
 
     def lookup_handler(service_id_str)
