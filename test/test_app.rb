@@ -1,13 +1,14 @@
 # frozen_string_literal: true
-require 'active_record'
-require 'action_pack'
-require 'action_controller'
-require 'active_job'
-require 'rails'
 
-database = 'development.sqlite3'
-ENV['DATABASE_URL'] = "sqlite3:#{database}"
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: database)
+require "active_record"
+require "action_pack"
+require "action_controller"
+require "active_job/railtie"
+require "rails"
+
+database = "development.sqlite3"
+ENV["DATABASE_URL"] = "sqlite3:#{database}"
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: database)
 ActiveRecord::Base.logger = Logger.new(nil)
 ActiveRecord::Schema.define do
   create_table "received_webhooks", force: :cascade do |t|
@@ -32,9 +33,10 @@ class MunsterTestApp < Rails::Application
   config.root = __dir__
   config.eager_load = false
   config.consider_all_requests_local = true
-  config.secret_key_base = 'i_am_a_secret'
+  config.secret_key_base = "i_am_a_secret"
   config.active_support.cache_format_version = 7.0
   config.hosts << ->(host) { true } # Permit all hosts
+
   routes.append do
     mount Munster::Engine, at: "/munster"
     post "/per-user-munster/:user_id/private" => "munster/receive_webhooks#create"
