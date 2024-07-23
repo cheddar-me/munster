@@ -2,7 +2,6 @@ require_relative "test_app"
 require "rails/test_help"
 
 class ActiveSupport::TestCase
-  # fixtures :all
   # Same as "assert_changes" in Rails but for countable entities.
   # @return [*] return value of the block
   # @example
