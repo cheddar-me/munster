@@ -1,34 +1,3 @@
-# ENV["RAILS_ENV"] = "test"
-#
-# require "rails/all"
-#
-# database = 'development.sqlite3'
-# ENV['DATABASE_URL'] = "sqlite3:#{database}"
-# ENV['DATABASE_URL'] = "sqlite3:#{database}"
-# ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: database)
-# ActiveRecord::Base.logger = Logger.new(STDOUT)
-# ActiveRecord::Schema.define do
-#   create_table :posts, force: true do |t|
-#   end
-#
-#   create_table :comments, force: true do |t|
-#     t.integer :post_id
-#   end
-# end
-
-# require_relative "../test/dummy/config/environment"
-# ActiveRecord::Migrator.migrations_paths = [File.expand_path("../test/dummy/db/migrate", __dir__)]
-# ActiveRecord::Migrator.migrations_paths << File.expand_path("../db/migrate", __dir__)
-# require "rails/test_help"
-
-# Load fixtures from the engine
-# if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
-#   ActiveSupport::TestCase.fixture_paths = [File.expand_path("fixtures", __dir__)]
-#   ActionDispatch::IntegrationTest.fixture_paths = ActiveSupport::TestCase.fixture_paths
-#   ActiveSupport::TestCase.file_fixture_path = File.expand_path("fixtures", __dir__) + "/files"
-#   ActiveSupport::TestCase.fixtures :all
-# end
-
 require_relative "test_app"
 require "rails/test_help"
 
