@@ -5,14 +5,23 @@ require "active_job" if defined?(Rails)
 module Munster
   class ProcessingJob < ActiveJob::Base
     def perform(webhook)
+      webhook.class.transaction do
+        webhook.with_lock do
+          return unless webhook.received?
+          webhook.processing!
+        end
+      end
+
       if webhook.handler.valid?(webhook.request)
-        # TODO: we are going to add some default state lifecycle managed
-        # by the background job later
         webhook.handler.process(webhook)
+        webhook.processed! if webhook.processing?
       else
-        Rails.logger.info { "Webhook #{webhook.inspect} did not pass validation and was skipped" }
+        Rails.logger.info { "#{webhook.class} #{webhook.id} did not pass validation and was skipped" }
         webhook.failed_validation!
       end
+    rescue => e
+      webhook.error!
+      raise e
     end
   end
 end
