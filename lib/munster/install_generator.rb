@@ -15,6 +15,7 @@ module Munster
 
     def create_migration_file
       migration_template "create_munster_tables.rb.erb", File.join(db_migrate_path, "create_munster_tables.rb")
+      migration_template "add_headers_to_munster_webhooks.rb.erb", File.join(db_migrate_path, "add_headers_to_munster_webhooks.rb")
     end
 
     def copy_files

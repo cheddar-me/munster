@@ -2,55 +2,54 @@
 
 module Munster
   class ReceiveWebhooksController < ActionController::API
-    class HandlerRefused < StandardError
-    end
-
     class HandlerInactive < StandardError
     end
 
+    class UnknownHandler < StandardError
+    end
+
     def create
-      handler = lookup_handler(params[:service_id]).new
-
-      raise HandlerInactive unless handler.active?
-      raise HandlerRefused unless handler.valid?(request)
-
-      handler.handle(request)
-      head :ok
-    rescue KeyError # handler was not found, so we return generic 404 error.
-      render_error("Required parameters were not present in the request", :not_found)
-    rescue => e
       Rails.error.set_context(**Munster.configuration.error_context)
-      # Rails 7.1 only requires `error` attribute for .report method, but Rails 7.0 requires `handled:` attribute additionally.
-      # We're setting `handled:` and `severity:` attributes to maintain compatibility with all versions of > rails 7.
+      handler = lookup_handler(service_id)
+      raise HandlerInactive unless handler.active?
+      handler.handle(request)
+      render(json: {ok: true, error: nil})
+    rescue UnknownHandler => e
       Rails.error.report(e, handled: true, severity: :error)
-
-      if handler&.expose_errors_to_sender?
-        error_for_sender_from_exception(e)
-      else
-        head :ok
-      end
+      render_error_with_status("No handler found for #{service_id.inspect}", status: :not_found)
+    rescue HandlerInactive => e
+      Rails.error.report(e, handled: true, severity: :error)
+      render_error_with_status("Webhook handler #{service_id.inspect} is inactive", status: :service_unavailable)
+    rescue => e
+      raise e unless handler
+      raise e if handler.expose_errors_to_sender?
+      Rails.error.report(e, handled: true, severity: :error)
+      render_error_with_status("Internal error (#{e})")
     end
 
-    def error_for_sender_from_exception(e)
-      case e
-      when HandlerRefused
-        render_error("Webhook handler did not validate the request (signature or authentication may be invalid)", :forbidden)
-      when HandlerInactive
-        render_error("Webhook handler is inactive", :service_unavailable)
-      when JSON::ParserError
-        render_error("Request body is not a valid JSON", :bad_request)
-      else
-        render_error("Internal error", :internal_server_error)
-      end
+    def service_id
+      params.require(:service_id)
     end
 
-    def render_error(message_str, status_sym)
-      json = {error: message_str}.to_json
-      render(json: json, status: status_sym)
+    def render_error_with_status(message_str, status: :ok)
+      json = {ok: false, error: message_str}.to_json
+      render(json: json, status: status)
     end
 
     def lookup_handler(service_id_str)
-      Munster.configuration.active_handlers.with_indifferent_access.fetch(service_id_str)
+      active_handlers = Munster.configuration.active_handlers.with_indifferent_access
+      # The config can specify a mapping of:
+      # {"service-1" => MyHandler }
+      # or
+      # {"service-2" => "MyOtherHandler"}
+      # We need to support both, because `MyHandler` is not loaded yet when Rails initializers run.
+      # Zeitwerk takes over after the initializers. So we can't really use a module in the init cycle just yet.
+      # We can, however, use the module name - and resolve it lazily, later.
+      handler_class_or_class_name = active_handlers.fetch(service_id_str)
+      handler_class = handler_class_or_class_name.respond_to?(:constantize) ? handler_class_or_class_name.constantize : handler_class_or_class_name
+      handler_class.new
+    rescue KeyError
+      raise UnknownHandler
     end
   end
 end

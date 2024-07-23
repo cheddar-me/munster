@@ -22,11 +22,13 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 Generate migrations and initializer file.
 
-`munster:install`
+`bin/rails g munster:install`
 
 Mount munster engine in your routes.
 
-`mount Munster::Engine, at: "/webhooks"`
+```ruby
+mount Munster::Engine, at: "/webhooks"
+```
 
 ## Requirements
 
@@ -40,7 +42,8 @@ This project depends on two dependencies:
 This gem uses [Rails common error reporter](https://guides.rubyonrails.org/error_reporting.html) to report any possible error to services like Honeybadger, Appsignal, Sentry and etc. Most of those services already support this common interface, if not - it's not that hard to add this support on your own.
 
 It's possible to provide additional context for every error. e.g.
-```
+
+```ruby
 Munster.configure do |config|
   config.error_context = { appsignal: { namespace: "webhooks" } }
 end

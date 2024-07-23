@@ -1,25 +1,7 @@
-# Configure Rails Environment
-ENV["RAILS_ENV"] = "test"
-
-require_relative "../test/dummy/config/environment"
-ActiveRecord::Migrator.migrations_paths = [File.expand_path("../test/dummy/db/migrate", __dir__)]
-ActiveRecord::Migrator.migrations_paths << File.expand_path("../db/migrate", __dir__)
+require_relative "test_app"
 require "rails/test_help"
 
-# Load fixtures from the engine
-if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
-  ActiveSupport::TestCase.fixture_paths = [File.expand_path("fixtures", __dir__)]
-  ActionDispatch::IntegrationTest.fixture_paths = ActiveSupport::TestCase.fixture_paths
-  ActiveSupport::TestCase.file_fixture_path = File.expand_path("fixtures", __dir__) + "/files"
-  ActiveSupport::TestCase.fixtures :all
-end
-
-def post_json(path, obj)
-  post path, params: obj.to_json, headers: {"CONTENT_TYPE" => "application/json"}
-end
-
 class ActiveSupport::TestCase
-  fixtures :all
   # Same as "assert_changes" in Rails but for countable entities.
   # @return [*] return value of the block
   # @example
