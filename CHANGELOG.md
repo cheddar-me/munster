@@ -6,6 +6,7 @@ This format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## Unreleased
 
+- Manage the `state` of the `ReceivedWebhook` from the background job itself. This frees up the handler to actually do the work associated with processing only. The job will manage the rest.
 - Use `valid?` in the background job instead of the controller. Most common configuration issue is an incorrectly specified signing secret, or an incorrectly implemented input validation. When these happen, it is better to allow the webhook to be reprocessed
 - Use instance methods in handlers instead of class methods, as they are shorter to define. Assume a handler module supports `.new` - with a module using singleton methods it may return `self` from `new`.
 - In the config, allow the handlers specified as strings. Module resolution in Rails happens after the config gets loaded, because the config may alter the Zeitwerk load paths. To allow the config to get loaded and to allow handlers to be autoloaded using Zeitwerk, the handler modules have to be resolved lazily. This also permits the handlers to be reloadable, like any module under Rails' autoloading control.

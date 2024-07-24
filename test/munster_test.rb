@@ -84,6 +84,50 @@ class TestMunster < ActionDispatch::IntegrationTest
     assert_predicate tf.read, :empty?
   end
 
+  test "marks a webhook as errored if it raises during processing" do
+    Munster::ReceivedWebhook.delete_all
+
+    tf = Tempfile.new
+    body = {isValid: true, raiseDuringProcessing: true, outputToFilename: tf.path}
+    body_json = body.to_json
+
+    post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
+    assert_response 200
+
+    webhook = Munster::ReceivedWebhook.last!
+
+    assert_predicate webhook, :received?
+    assert_equal "WebhookTestHandler", webhook.handler_module_name
+    assert_equal webhook.status, "received"
+    assert_equal webhook.body, body_json
+
+    assert_raises(StandardError) { perform_enqueued_jobs }
+    assert_predicate webhook.reload, :error?
+
+    tf.rewind
+    assert_predicate tf.read, :empty?
+  end
+
+  test "does not try to process a webhook if it is not in `received' state" do
+    Munster::ReceivedWebhook.delete_all
+
+    tf = Tempfile.new
+    body = {isValid: true, raiseDuringProcessing: true, outputToFilename: tf.path}
+    body_json = body.to_json
+
+    post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
+    assert_response 200
+
+    webhook = Munster::ReceivedWebhook.last!
+    webhook.processing!
+
+    perform_enqueued_jobs
+    assert_predicate webhook.reload, :processing?
+
+    tf.rewind
+    assert_predicate tf.read, :empty?
+  end
+
   test "raises an error if the service_id is not known" do
     post "/munster/missing_service", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 404
