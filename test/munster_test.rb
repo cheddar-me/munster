@@ -37,17 +37,51 @@ class TestMunster < ActionDispatch::IntegrationTest
     test(msg) { skip }
   end
 
-  test "accepts a webhook without an event ID and stores it" do
+  test "accepts a webhook, stores and processes it" do
     Munster::ReceivedWebhook.delete_all
 
-    post "/munster/test", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
+    tf = Tempfile.new
+    body = {isValid: true, outputToFilename: tf.path}
+    body_json = body.to_json
+
+    post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
     assert_response 200
 
     webhook = Munster::ReceivedWebhook.last!
 
+    assert_predicate webhook, :received?
     assert_equal "WebhookTestHandler", webhook.handler_module_name
     assert_equal webhook.status, "received"
-    assert_equal webhook.body, webhook_body
+    assert_equal webhook.body, body_json
+
+    perform_enqueued_jobs
+    assert_predicate webhook.reload, :processed?
+    tf.rewind
+    assert_equal tf.read, body_json
+  end
+
+  test "accepts a webhook but does not process it if it is invalid" do
+    Munster::ReceivedWebhook.delete_all
+
+    tf = Tempfile.new
+    body = {isValid: false, outputToFilename: tf.path}
+    body_json = body.to_json
+
+    post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
+    assert_response 200
+
+    webhook = Munster::ReceivedWebhook.last!
+
+    assert_predicate webhook, :received?
+    assert_equal "WebhookTestHandler", webhook.handler_module_name
+    assert_equal webhook.status, "received"
+    assert_equal webhook.body, body_json
+
+    perform_enqueued_jobs
+    assert_predicate webhook.reload, :failed_validation?
+
+    tf.rewind
+    assert_predicate tf.read, :empty?
   end
 
   test "raises an error if the service_id is not known" do
@@ -55,7 +89,7 @@ class TestMunster < ActionDispatch::IntegrationTest
     assert_response 404
   end
 
-  test "inactive handlers" do
+  test "returns a 503 when a handler is inactive" do
     post "/munster/inactive", params: webhook_body, headers: {"CONTENT_TYPE" => "application/json"}
 
     assert_response 503
