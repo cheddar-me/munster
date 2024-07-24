@@ -21,4 +21,5 @@ class Munster::Configuration
   config_accessor(:processing_job_class, default: Munster::ProcessingJob)
   config_accessor(:active_handlers, default: {})
   config_accessor(:error_context, default: {})
+  config_accessor(:request_body_size_limit, default: 512.kilobytes)
 end

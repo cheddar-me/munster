@@ -108,6 +108,18 @@ class TestMunster < ActionDispatch::IntegrationTest
     assert_predicate tf.read, :empty?
   end
 
+  test "does not accept a test payload that is larger than the configured maximum size" do
+    Munster::ReceivedWebhook.delete_all
+
+    oversize = Munster.configuration.request_body_size_limit + 1
+    utf8_junk = Base64.strict_encode64(Random.bytes(oversize))
+    body = {isValid: true, filler: utf8_junk, raiseDuringProcessing: false, outputToFilename: "/tmp/nothing"}
+    body_json = body.to_json
+
+    post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
+    assert_raises(ActiveRecord::RecordNotFound) { Munster::ReceivedWebhook.last! }
+  end
+
   test "does not try to process a webhook if it is not in `received' state" do
     Munster::ReceivedWebhook.delete_all
 

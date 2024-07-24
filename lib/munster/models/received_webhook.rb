@@ -37,7 +37,12 @@ module Munster
       # ...and the raw request body - because we already save it separately
       headers.delete("RAW_POST_DATA")
 
+      # Verify the request body is not too large
       request_body_io = action_dispatch_request.env.fetch("rack.input")
+      if request_body_io.size > Munster.configuration.request_body_size_limit
+        raise "Cannot accept the webhook as the request body is larger than #{limit} bytes"
+      end
+
       write_attribute("body", request_body_io.read.force_encoding(Encoding::BINARY))
       write_attribute("request_headers", headers)
     ensure
