@@ -5,11 +5,9 @@ require "active_job" if defined?(Rails)
 module Munster
   class ProcessingJob < ActiveJob::Base
     def perform(webhook)
-      webhook.class.transaction do
-        webhook.with_lock do
-          return unless webhook.received?
-          webhook.processing!
-        end
+      webhook.with_lock do
+        return unless webhook.received?
+        webhook.processing!
       end
 
       if webhook.handler.valid?(webhook.request)
