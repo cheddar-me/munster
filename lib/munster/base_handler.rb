@@ -16,7 +16,15 @@ module Munster
       webhook = Munster::ReceivedWebhook.new(request: action_dispatch_request, handler_event_id: handler_event_id, handler_module_name: handler_module_name)
       webhook.save!
 
-      Munster.configuration.processing_job_class.perform_later(webhook)
+      # The configured job class can be a class name or a module, to support lazy loading
+      job_class_or_module_name = Munster.configuration.processing_job_class
+      job_class = if job_class_or_module_name.respond_to?(:perform_later)
+        job_class_or_module_name
+      else
+        job_class_or_module_name.constantize
+      end
+
+      job_class.perform_later(webhook)
     rescue ActiveRecord::RecordNotUnique # Webhook deduplicated
       Rails.logger.info { "#{inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
     end
