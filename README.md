@@ -30,6 +30,18 @@ Mount munster engine in your routes.
 mount Munster::Engine, at: "/webhooks"
 ```
 
+Define a class for your first handler (let's call it `ExampleHandler`) and inherit it from `Munster::BaseHandler`. Place it somewhere where Rails autoloading can find it, and add it to your `munster.rb` config file:
+
+```ruby
+config.active_handlers = {
+  "example" => "ExampleHandler"
+}
+```
+
+## Example handlers
+
+We provide a number of webhook handlers which demonstrate certain features of Munster. You will find them in `handler-examples`.
+
 ## Requirements
 
 This project depends on two dependencies:
