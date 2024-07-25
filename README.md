@@ -33,7 +33,7 @@ mount Munster::Engine, at: "/webhooks"
 Define a class for your first handler (let's call it `ExampleHandler`) and inherit it from `Munster::BaseHandler`. Place it somewhere where Rails autoloading can find it, and add it to your `munster.rb` config file:
 
 ```ruby
-config.handlers = {
+config.active_handlers = {
   "example" => "ExampleHandler"
 }
 ```
