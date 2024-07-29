@@ -21,7 +21,7 @@ module Munster
       Rails.logger.info { "#{inspect} Webhook #{handler_event_id} is a duplicate delivery and will not be stored." }
     end
 
-    # Enqueues the processing job to process webhook asynchronously. The job class could be configured configured.
+    # Enqueues the processing job to process webhook asynchronously. The job class could be configured.
     #
     # @param webhook [Munster::ReceivedWebhook]
     # @return [void]
