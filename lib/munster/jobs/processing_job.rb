@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "active_job" if defined?(Rails)
+require "active_job/railtie"
 
 module Munster
   class ProcessingJob < ActiveJob::Base

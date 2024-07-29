@@ -3,7 +3,6 @@
 require "active_record"
 require "action_pack"
 require "action_controller"
-require "active_job/railtie"
 require "rails"
 
 database = "development.sqlite3"
