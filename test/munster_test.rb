@@ -4,6 +4,8 @@ require "test_helper"
 require_relative "test_app"
 
 class TestMunster < ActionDispatch::IntegrationTest
+  teardown { Munster::ReceivedWebhook.delete_all }
+
   def test_that_it_has_a_version_number
     refute_nil ::Munster::VERSION
   end
@@ -37,9 +39,18 @@ class TestMunster < ActionDispatch::IntegrationTest
     test(msg) { skip }
   end
 
-  test "accepts a webhook, stores and processes it" do
-    Munster::ReceivedWebhook.delete_all
+  test "ensure webhook is processed only once during creation" do
+    tf = Tempfile.new
+    body = {isValid: true, outputToFilename: tf.path}
+    body_json = body.to_json
 
+    assert_enqueued_jobs 1, only: Munster::ProcessingJob do
+      post "/munster/test", params: body_json, headers: {"CONTENT_TYPE" => "application/json"}
+      assert_response 200
+    end
+  end
+
+  test "accepts a webhook, stores and processes it" do
     tf = Tempfile.new
     body = {isValid: true, outputToFilename: tf.path}
     body_json = body.to_json
@@ -61,8 +72,6 @@ class TestMunster < ActionDispatch::IntegrationTest
   end
 
   test "accepts a webhook but does not process it if it is invalid" do
-    Munster::ReceivedWebhook.delete_all
-
     tf = Tempfile.new
     body = {isValid: false, outputToFilename: tf.path}
     body_json = body.to_json
@@ -85,8 +94,6 @@ class TestMunster < ActionDispatch::IntegrationTest
   end
 
   test "marks a webhook as errored if it raises during processing" do
-    Munster::ReceivedWebhook.delete_all
-
     tf = Tempfile.new
     body = {isValid: true, raiseDuringProcessing: true, outputToFilename: tf.path}
     body_json = body.to_json
@@ -109,8 +116,6 @@ class TestMunster < ActionDispatch::IntegrationTest
   end
 
   test "does not accept a test payload that is larger than the configured maximum size" do
-    Munster::ReceivedWebhook.delete_all
-
     oversize = Munster.configuration.request_body_size_limit + 1
     utf8_junk = Base64.strict_encode64(Random.bytes(oversize))
     body = {isValid: true, filler: utf8_junk, raiseDuringProcessing: false, outputToFilename: "/tmp/nothing"}
@@ -121,8 +126,6 @@ class TestMunster < ActionDispatch::IntegrationTest
   end
 
   test "does not try to process a webhook if it is not in `received' state" do
-    Munster::ReceivedWebhook.delete_all
-
     tf = Tempfile.new
     body = {isValid: true, raiseDuringProcessing: true, outputToFilename: tf.path}
     body_json = body.to_json
@@ -192,5 +195,20 @@ class TestMunster < ActionDispatch::IntegrationTest
     assert_equal "John", received_webhook.request.params["user_name"]
     assert_equal 14, received_webhook.request.params["number_of_dependents"]
     assert_equal "123", received_webhook.request.params["user_id"]
+  end
+
+  test "erroneous webhook could be processed again" do
+    webhook = Munster::ReceivedWebhook.create(
+      handler_event_id: "test",
+      handler_module_name: "WebhookTestHandler",
+      status: "error",
+      body: {isValid: true}.to_json
+    )
+
+    assert_enqueued_jobs 1, only: Munster::ProcessingJob do
+      webhook.received!
+
+      assert_equal "received", webhook.status
+    end
   end
 end
