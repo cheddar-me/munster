@@ -4,23 +4,25 @@ require "active_job/railtie"
 
 module Munster
   class ProcessingJob < ActiveJob::Base
-    class WebhookPayloadInvalid < StandardError
-    end
-
     def perform(webhook)
       Rails.error.set_context(munster_handler_module_name: webhook.handler_module_name, **Munster.configuration.error_context)
 
+      webhook_details_for_logs = "Munster::ReceivedWebhook#%s (handler: %s)" % [webhook.id, webhook.handler]
       webhook.with_lock do
-        return unless webhook.received?
+        unless webhook.received?
+          logger.info { "#{webhook_details_for_logs} is being processed in a different job or has been processed already, skipping." }
+          return
+        end
         webhook.processing!
       end
 
       if webhook.handler.valid?(webhook.request)
+        logger.info { "#{webhook_details_for_logs} starting to process" }
         webhook.handler.process(webhook)
         webhook.processed! if webhook.processing?
+        logger.info { "#{webhook_details_for_logs} processed" }
       else
-        e = WebhookPayloadInvalid.new("#{webhook.class} #{webhook.id} did not pass validation and was skipped")
-        Rails.error.report(e, handled: true, severity: :error)
+        logger.info { "#{webhook_details_for_logs} did not pass validation by the handler. Marking it `failed_validation`." }
         webhook.failed_validation!
       end
     rescue => e
