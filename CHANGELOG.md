@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.2
+
+- When processing a webhook, print messages to the ActiveJob logger. This allows for quicker debugging if the app does not have an error tracking service set up
+
 ## 0.4.1
 
 - Webhook processor now requires `active_job/railtie`, instead of `active_job`. It requires GlobalID to work and that get's required only with railtie.
