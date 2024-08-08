@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    munster (0.4.1)
+    munster (0.4.2)
       rails (>= 7.0)
       state_machine_enum
 
