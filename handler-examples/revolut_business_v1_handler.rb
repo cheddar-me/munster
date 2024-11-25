@@ -5,7 +5,7 @@ class RevolutBusinessV1Handler < Munster::BaseHandler
     true
   end
 
-  def self.process(webhook)
+  def process(webhook)
     parsed_payload = JSON.parse(webhook.body)
     topic = parsed_payload.fetch("Topic")
     case topic
@@ -18,7 +18,7 @@ class RevolutBusinessV1Handler < Munster::BaseHandler
     end
   end
 
-  def self.extract_event_id_from_request(action_dispatch_request)
+  def extract_event_id_from_request(action_dispatch_request)
     # Since b-tree indices generally divide from the start of the string, place the highest
     # entropy component at the start (the EventId)
     key_components = %w[EventId Topic Version]
