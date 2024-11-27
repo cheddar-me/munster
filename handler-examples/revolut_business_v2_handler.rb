@@ -30,11 +30,11 @@ class RevolutBusinessV2Handler < Munster::BaseHandler
     matches.any?
   end
 
-  def self.process(webhook)
+  def process(webhook)
     Rails.logger.info { "Processing Revolut webhook #{webhook.body.inspect}" }
   end
 
-  def self.extract_event_id_from_request(action_dispatch_request)
+  def extract_event_id_from_request(action_dispatch_request)
     # The event ID is only available when you retrieve the failed webhooks, which is sad.
     # We can divinate a synthetic ID though by taking a hash of the entire payload though.
     Digest::SHA256.hexdigest(action_dispatch_request.body.read)
